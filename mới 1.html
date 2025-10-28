@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Góc học tập của Trần Cát Tường</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-pink: #ffc7db;
+    --card-bg: rgba(0,0,0,0.12);
+    --white: #ffffff;
+    --blue: #0077cc;
+    --dark: #0b0b0b;
+    --accent: #ff9f43;
+    --highlight: #00b4d8;
+    --glass: rgba(255,255,255,0.06);
+    --glass-2: rgba(255,255,255,0.10);
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:"Poppins",sans-serif;
+    background: linear-gradient(180deg,var(--bg-pink) 0%, #ffd6e8 100%);
+    color:var(--white);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .wrap{ max-width:1100px; margin:24px auto; padding:20px; }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .profile{ display:flex; gap:14px; align-items:center; }
+  .avatar{
+    width:78px; height:78px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px;
+    background:linear-gradient(135deg,var(--highlight),var(--blue));
+    box-shadow:0 6px 18px rgba(0,0,0,0.15);
+  }
+  .profile .info h1{ margin:0; font-size:20px; font-weight:700; color:var(--dark); }
+  .profile .info p{ margin:2px 0; font-size:13px; color:rgba(0,0,0,0.7); }
+  .slogan{ text-align:right; font-size:14px; color:var(--dark); }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:16px;
+  }
+
+  .card{
+    background:var(--card-bg);
+    border-radius:20px;
+    padding:18px;
+    min-height:120px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12);
+    cursor:pointer;
+    transition:transform .22s ease, box-shadow .22s ease;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .card:hover{ transform:translateY(-8px); box-shadow:0 14px 32px rgba(0,0,0,0.18); }
+  .card h3{ margin:0; font-size:18px; color:var(--dark); }
+  .card p{ margin:0; font-size:13px; color:rgba(0,0,0,0.6); }
+
+  .subjects{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+  }
+  .sub-card{
+    background:var(--glass);
+    padding:14px;
+    border-radius:16px;
+    cursor:pointer;
+    transition:transform .18s ease;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--dark);
+    font-weight:600;
+  }
+  .sub-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 10px 20px rgba(0,0,0,0.12);
+    background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.1));
+  }
+
+  footer{ margin-top:30px; text-align:center; color:rgba(0,0,0,0.6); font-size:13px; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <header>
+    <div class="profile">
+      <div class="avatar">📚</div>
+      <div class="info">
+        <h1>Góc học tập của Trần Cát Tường</h1>
+        <p>Học vui - Học sáng tạo - Học hiệu quả</p>
+      </div>
+    </div>
+    <div class="slogan">🌸 Keep learning every day!</div>
+  </header>
+
+  <h2 style="color:var(--dark)">Chọn môn học hoặc hoạt động:</h2>
+
+  <div class="subjects">
+    <div class="sub-card" onclick="window.location.href='toan11.html'">📘 Toán 11</div>
+    <div class="sub-card" onclick="window.location.href='ly11.html'">⚡ Vật Lí 11</div>
+    <div class="sub-card" onclick="window.location.href='hoa11.html'">🧪 Hóa học 11</div>
+    <div class="sub-card" onclick="window.location.href='van11.html'">📗 Ngữ văn 11</div>
+    <div class="sub-card" onclick="window.location.href='tienganh11.html'">📙 Tiếng Anh 11</div>
+    <div class="sub-card" onclick="window.location.href='trochoi.html'">🎮 Trò chơi học tập</div>
+    <div class="sub-card" onclick="window.location.href='nhac.html'">🎵 Góc âm nhạc cá nhân</div>
+  </div>
+
+  <footer>© 2025 Góc học tập của Trần Cát Tường • Thiết kế bởi ChatGPT</footer>
+</div>
+</body>
+</html>

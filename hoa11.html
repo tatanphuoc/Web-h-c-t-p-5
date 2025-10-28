@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📘 Hóa học 11</title>
+<style>
+  :root {
+    --bg: #0e1726;
+    --card: #12221a;
+    --accent1: #f39c12;
+    --accent2: #2ecc71;
+    --text: #e6eef8;
+    --muted: #94a3b8;
+  }
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    text-align: center;
+  }
+  h1 { color: var(--accent2); }
+  .chapter, .lesson, .content { display: none; }
+  .active { display: block; }
+  .card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 12px;
+    margin: 10px auto;
+    max-width: 500px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .card:hover { transform: scale(1.03); border: 1px solid var(--accent1); }
+  .btn {
+    background: var(--accent1);
+    color: var(--bg);
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+  }
+  iframe {
+    width: 100%; height: 360px; border: none; border-radius: 8px; margin-top: 10px;
+  }
+  .question {
+    background: var(--card);
+    margin: 10px auto;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 600px;
+    text-align: left;
+  }
+  .file-item {
+    display:flex; justify-content:space-between; align-items:center;
+    background:#0f2318; margin:6px auto; padding:8px 12px;
+    border-radius:8px; max-width:600px;
+  }
+  input[type=text]{
+    width:90%; padding:8px; border-radius:6px; border:1px solid #233a2b; background:#08120b; color:var(--text);
+  }
+  .back {
+    display: block;
+    margin: 20px auto;
+    color: var(--accent2);
+    cursor: pointer;
+  }
+  .result { margin: 20px auto; color: var(--accent1); }
+</style>
+</head>
+<body>
+
+<h1>📘 Hóa học 11</h1>
+<p>Chọn chương để bắt đầu học</p>
+
+<div id="chapters"></div>
+<div id="lessons" class="chapter"></div>
+<div id="lessonDetail" class="lesson"></div>
+<div id="content" class="content"></div>
+
+<script>
+  // ======================== DỮ LIỆU CÁC CHƯƠNG ========================
+  const data = [
+    { title: "Chương 1: Cân bằng hoá học", lessons: [
+      "Bài 1: Khái niệm về cân bằng hoá học",
+      "Bài 2: Cân bằng trong dung dịch nước"
+    ]},
+    { title: "Chương 2: Nitơ và Lưu huỳnh", lessons: [
+      "Bài 3: Đơn chất Nitơ",
+      "Bài 4: Amoniac và hợp chất Amoni",
+      "Bài 5: Một số hợp chất của Nitơ với Oxi",
+      "Bài 6: Lưu huỳnh và Lưu huỳnh đioxit",
+      "Bài 7: Axit Sunfuric và muối Sunfat"
+    ]},
+    { title: "Chương 3: Đại cương hóa học hữu cơ", lessons: [
+      "Bài 8: Hợp chất hữu cơ và hóa học hữu cơ",
+      "Bài 9: Phương pháp tách và tinh chế hợp chất hữu cơ",
+      "Bài 10: Công thức phân tử hợp chất hữu cơ",
+      "Bài 11: Cấu tạo hóa học hợp chất hữu cơ"
+    ]},
+    { title: "Chương 4: Hiđrocacbon", lessons: [
+      "Bài 12: Ankan",
+      "Bài 13: Hiđrocacbon không no",
+      "Bài 14: Hiđrocacbon thơm"
+    ]},
+    { title: "Chương 5: Dẫn xuất halogen – Ancol – Phenol", lessons: [
+      "Bài 15: Dẫn xuất halogen",
+      "Bài 16: Ancol",
+      "Bài 17: Phenol"
+    ]},
+    { title: "Chương 6: Hợp chất cacbonyl – Axit cacboxylic", lessons: [
+      "Bài 18: Andehit – Xeton",
+      "Bài 19: Axit cacboxylic"
+    ]}
+  ];
+  
+  // ======================== NGÂN HÀNG CÂU HỎI ========================
+  const quiz = {
+    // ===== CHƯƠNG 1 =====
+    1: [
+      { q: "Cân bằng hoá học là trạng thái mà...", a: "Tốc độ thuận bằng tốc độ nghịch", opts: ["Phản ứng ngừng hẳn","Tốc độ thuận bằng tốc độ nghịch","Không còn chất tham gia","Chỉ có phản ứng nghịch"] },
+      { q: "Hằng số cân bằng Kc phụ thuộc vào yếu tố nào?", a: "Nhiệt độ", opts: ["Nồng độ","Áp suất","Nhiệt độ","Thể tích"] },
+      { q: "Khi tăng nồng độ chất tham gia, cân bằng chuyển dịch...", a: "Theo chiều thuận", opts: ["Theo chiều thuận","Theo chiều nghịch","Không đổi","Không xác định"] },
+      { q: "Nguyên lý Lơ Sa-tơ-li-ê cho biết...", a: "Cân bằng chuyển dịch chống lại sự thay đổi", opts: ["Phản ứng chỉ xảy ra 1 chiều","Không có cân bằng","Cân bằng chuyển dịch chống lại sự thay đổi","Không liên quan"] },
+      { q: "Khi giảm áp suất, cân bằng của phản ứng khí chuyển dịch...", a: "Về phía có nhiều mol khí hơn", opts: ["Về phía có nhiều mol khí hơn","Phía ít mol hơn","Không đổi","Không xác định"] },
+      { q: "Nhiệt độ tăng làm phản ứng thu nhiệt...", a: "Chuyển dịch thuận", opts: ["Chuyển dịch thuận","Nghịch","Không đổi","Không xác định"] },
+      { q: "Khi thêm chất xúc tác, cân bằng...", a: "Thiết lập nhanh hơn", opts: ["Thay đổi vị trí","Không ảnh hưởng","Thiết lập nhanh hơn","Dịch nghịch"] },
+      { q: "Công thức hằng số Kp liên hệ với Kc là?", a: "Kp = Kc(RT)^Δn", opts: ["Kp = Kc(RT)^Δn","Kp = Kc","Kp = Kc/T","Kp = 1/Kc"] },
+      { q: "Phản ứng thuận là tỏa nhiệt, vậy tăng nhiệt độ làm...", a: "Cân bằng chuyển dịch nghịch", opts: ["Cân bằng thuận","Nghịch","Không đổi","Không xác định"] },
+      { q: "Tại cân bằng, nồng độ các chất...", a: "Không đổi theo thời gian", opts: ["Bằng nhau","Không đổi theo thời gian","Tăng liên tục","Giảm dần"] },
+      { q: "Áp dụng nguyên lý Lơ Sa-tơ-li-ê nhằm...", a: "Điều khiển chiều chuyển dịch", opts: ["Điều khiển chiều chuyển dịch","Tăng tốc độ phản ứng","Tạo phản ứng mới","Phá vỡ cân bằng"] },
+      { q: "Hằng số cân bằng biểu thị...", a: "Mức độ xảy ra phản ứng", opts: ["Tốc độ phản ứng","Mức độ xảy ra phản ứng","Số mol chất","Áp suất"] },
+      { q: "Khi pha loãng dung dịch cân bằng, phản ứng...", a: "Chuyển dịch về phía tăng số ion", opts: ["Không đổi","Chuyển dịch về phía tăng số ion","Chuyển dịch nghịch","Không xác định"] },
+      { q: "Phản ứng thuận nghịch là gì?", a: "Phản ứng xảy ra theo hai chiều ngược nhau", opts: ["Một chiều","Ngược chiều nhau","Không đảo ngược được","Phụ thuộc xúc tác"] },
+      { q: "Cân bằng động nghĩa là...", a: "Phản ứng vẫn diễn ra nhưng tốc độ hai chiều bằng nhau", opts: ["Phản ứng dừng","Không có phản ứng","Tốc độ bằng nhau","Không đổi nồng độ"] },
+      { q: "Nếu Kc rất lớn, phản ứng...", a: "Chủ yếu theo chiều thuận", opts: ["Chủ yếu nghịch","Không xảy ra","Theo chiều thuận","Không xác định"] },
+      { q: "Nếu Kc rất nhỏ, phản ứng...", a: "Hầu như không xảy ra theo chiều thuận", opts: ["Rất nhanh","Theo chiều thuận","Hầu như không xảy ra","Bằng nhau"] },
+      { q: "Ở nhiệt độ không đổi, tăng áp suất tổng thì...", a: "Cân bằng dịch về phía ít mol khí hơn", opts: ["Phía nhiều mol","Không đổi","Phía ít mol khí hơn","Không xác định"] },
+      { q: "Khi thêm chất rắn tinh khiết vào hệ cân bằng...", a: "Không ảnh hưởng vị trí cân bằng", opts: ["Thay đổi cân bằng","Không ảnh hưởng","Dịch nghịch","Tăng tốc độ"] },
+      { q: "Cân bằng hoá học là loại cân bằng...", a: "Động", opts: ["Động","Tĩnh","Cơ học","Vật lý"] }
+    ],
+  
+    // ===== CHƯƠNG 2 =====
+    2: [
+      { q: "Nitơ chiếm khoảng bao nhiêu % thể tích không khí?", a: "78%", opts: ["21%","78%","1%","50%"] },
+      { q: "Liên kết trong phân tử N₂ là loại?", a: "Ba liên kết cộng hoá trị", opts: ["Đơn","Đôi","Ba liên kết cộng hoá trị","Ion"] },
+      { q: "Amoniac có tính chất nào nổi bật?", a: "Bazơ yếu", opts: ["Bazơ mạnh","Bazơ yếu","Axit yếu","Trung tính"] },
+      { q: "Amoniac tan tốt trong nước do?", a: "Tạo liên kết hiđro với nước", opts: ["Tạo liên kết ion","Liên kết kim loại","Liên kết hiđro","Không tan"] },
+      { q: "Dung dịch amoniac có khả năng làm quỳ tím...", a: "Hoá xanh", opts: ["Hoá đỏ","Hoá xanh","Không đổi màu","Mất màu"] },
+      { q: "Muối amoni dễ bị phân huỷ khi?", a: "Đun nóng", opts: ["Đun nóng","Làm lạnh","Hoà tan","Thêm axit"] },
+      { q: "Axit nitric là chất...", a: "Oxi hoá mạnh", opts: ["Khử mạnh","Oxi hoá mạnh","Trung hoà","Không phản ứng"] },
+      { q: "SO₂ tác dụng với nước tạo thành?", a: "H₂SO₃", opts: ["H₂SO₄","H₂SO₃","H₂S","H₂O₂"] },
+      { q: "Sản phẩm chính khi oxi hoá SO₂ là?", a: "SO₃", opts: ["SO","SO₃","S","H₂S"] },
+      { q: "Trong công nghiệp, H₂SO₄ được sản xuất theo quy trình nào?", a: "Tiếp xúc", opts: ["Điện phân","Tiếp xúc","Hấp thụ trực tiếp","Chưng cất"] },
+      { q: "Ion amoni có công thức?", a: "NH₄⁺", opts: ["NH₃","NH₄⁺","NO₂⁻","NO₃⁻"] },
+      { q: "Amoniac có thể phản ứng với axit tạo thành?", a: "Muối amoni", opts: ["Muối amoni","Axit mạnh","Axit yếu","Không phản ứng"] },
+      { q: "Khí SO₂ có tính chất gì?", a: "Vừa khử vừa oxi hoá", opts: ["Chỉ oxi hoá","Chỉ khử","Vừa khử vừa oxi hoá","Trung tính"] },
+      { q: "Sắt tác dụng với H₂SO₄ đặc nóng tạo ra khí?", a: "SO₂", opts: ["SO₂","H₂S","H₂","O₂"] },
+      { q: "Nitơ thuộc nhóm nguyên tố nào?", a: "VA", opts: ["IIA","VIA","VA","VIIA"] },
+      { q: "Sản phẩm khử của NO₃⁻ trong môi trường axit có thể là?", a: "NO hoặc NO₂", opts: ["NO hoặc NO₂","NH₄⁺","N₂O","N₂"] },
+      { q: "SO₂ làm mất màu dung dịch?", a: "Br₂", opts: ["KMnO₄","HCl","NaOH","Br₂"] },
+      { q: "Axit sunfuric đặc nguội không phản ứng với?", a: "Cu", opts: ["Cu","Fe","Al","Zn"] },
+      { q: "Axit nitric phân huỷ tạo khí gì?", a: "NO₂", opts: ["N₂","NO₂","O₂","NH₃"] },
+      { q: "Khí NO₂ có màu gì?", a: "Nâu đỏ", opts: ["Không màu","Nâu đỏ","Vàng nhạt","Xanh"] }
+    ],
+  
+    // ===== CHƯƠNG 3 =====
+    3: [
+      { q: "Hợp chất hữu cơ chứa nguyên tố chính nào?", a: "C, H, O", opts: ["C, H, O","C, O, N","Fe, Cu, O","N, S, Cl"] },
+      { q: "Hợp chất hữu cơ khác vô cơ ở chỗ?", a: "Chủ yếu liên kết cộng hoá trị", opts: ["Chủ yếu liên kết ion","Cộng hoá trị","Kim loại","Hiđro"] },
+      { q: "Các hydrocacbon là hợp chất của?", a: "C và H", opts: ["C và H","C, H, O","H và O","C và N"] },
+      { q: "Hợp chất hữu cơ dễ cháy do?", a: "Chứa cacbon và hiđro", opts: ["Có oxi","Có nitơ","Chứa cacbon và hiđro","Không xác định"] },
+      { q: "Phương pháp chưng cất dùng để?", a: "Tách chất dựa vào nhiệt độ sôi", opts: ["Tách theo khối lượng","Theo màu sắc","Theo kích thước","Theo khối lượng riêng"] },
+      { q: "Phản ứng thế là phản ứng trong đó...", a: "Nguyên tử trong phân tử bị thay thế", opts: ["Nguyên tử thêm vào","Tách ra","Thay thế","Không đổi"] },
+      { q: "Công thức phân tử cho biết?", a: "Số nguyên tử mỗi nguyên tố", opts: ["Cấu trúc liên kết","Số nguyên tử mỗi nguyên tố","Tính chất vật lý","Tính chất hóa học"] },
+      { q: "Công thức cấu tạo biểu diễn?", a: "Cách liên kết giữa các nguyên tử", opts: ["Số nguyên tử","Khối lượng mol","Cách liên kết","Nhiệt độ sôi"] },
+      { q: "Đồng phân là gì?", a: "Các chất có cùng công thức phân tử nhưng cấu tạo khác nhau", opts: ["Giống nhau","Khác nhau hoàn toàn","Khác công thức","Không xác định"] },
+      { q: "Các loại phản ứng hữu cơ gồm?", a: "Thế, cộng, tách, oxi hoá – khử", opts: ["Trung hoà, nhiệt phân","Thế, cộng, tách, oxi hoá – khử","Phân huỷ","Trùng hợp"] },
+      { q: "Ankan là hydrocacbon?", a: "No, mạch hở", opts: ["No, mạch hở","Không no","Thơm","Vòng"] },
+      { q: "Anken có công thức tổng quát?", a: "CnH2n", opts: ["CnH2n","CnH2n+2","CnH2n-2","CnH2n+1"] },
+      { q: "Ankin có công thức tổng quát?", a: "CnH2n-2", opts: ["CnH2n","CnH2n+2","CnH2n-2","CnH2n-4"] },
+      { q: "Benzene có công thức?", a: "C6H6", opts: ["C6H6","C6H12","C5H10","C7H8"] },
+      { q: "Phản ứng oxi hoá ancol bậc 1 cho sản phẩm?", a: "Andehit", opts: ["Andehit","Xeton","Axit","Este"] },
+      { q: "Ancol etylic có công thức?", a: "C2H5OH", opts: ["C2H5OH","CH3OH","C3H7OH","C4H9OH"] },
+      { q: "Este thuỷ phân trong môi trường kiềm tạo?", a: "Muối và ancol", opts: ["Axit và ancol","Muối và ancol","Axit và xeton","Ancol và este"] },
+      { q: "Phản ứng trùng hợp là?", a: "Nhiều phân tử nhỏ tạo phân tử lớn", opts: ["Tách nước","Oxi hoá","Nhiều phân tử nhỏ tạo phân tử lớn","Không xác định"] },
+      { q: "Chất béo là?", a: "Este của glixerol và axit béo", opts: ["Este của glixerol và axit béo","Este của ancol đơn chức","Hợp chất vô cơ","Ancol"] },
+      { q: "Protein là?", a: "Polyme thiên nhiên của axit amin", opts: ["Axit","Este","Polyme thiên nhiên của axit amin","Hydrocacbon"] }
+    ],
+  
+    // ===== CÁC CHƯƠNG SAU: 5 CÂU CỐ ĐỊNH =====
+    4: [
+      { q: "Ankan là hydrocacbon?", a: "No, mạch hở", opts: ["No, mạch hở","Không no","Thơm","Vòng"] },
+      { q: "Anken có công thức tổng quát?", a: "CnH2n", opts: ["CnH2n","CnH2n+2","CnH2n-2","CnH2n+1"] },
+      { q: "Ankin có công thức tổng quát?", a: "CnH2n-2", opts: ["CnH2n","CnH2n+2","CnH2n-2","CnH2n-4"] },
+      { q: "Phản ứng cháy của hydrocacbon sinh ra?", a: "CO₂ và H₂O", opts: ["CO₂ và H₂O","CO và H₂","C và H₂O","CO₂ và O₂"] },
+      { q: "Benzene thuộc loại hydrocacbon?", a: "Thơm", opts: ["No","Không no","Thơm","Vòng"] }
+    ],
+    5: [
+      { q: "Ancol có nhóm chức?", a: "–OH", opts: ["–OH","–COOH","–CHO","–NH₂"] },
+      { q: "Phenol có tính axit yếu vì?", a: "Nhóm –OH gắn với vòng benzen", opts: ["–OH gắn với benzen","–COOH","–NH₂","Không xác định"] },
+      { q: "Dẫn xuất halogen chứa nguyên tố?", a: "Cl, Br, I, F", opts: ["C, H, O","N, S, O","Cl, Br, I, F","K, Na, Mg"] },
+      { q: "Ancol etylic có công thức?", a: "C₂H₅OH", opts: ["C₂H₅OH","CH₃OH","C₃H₇OH","C₄H₉OH"] },
+      { q: "Phản ứng đặc trưng của ancol là?", a: "Tách nước", opts: ["Tách nước","Thế clo","Cộng H₂","Trùng hợp"] }
+    ],
+    6: [
+      { q: "Andehit có nhóm chức?", a: "–CHO", opts: ["–COOH","–CHO","–OH","–CO–"] },
+      { q: "Xeton có nhóm chức?", a: "–CO–", opts: ["–CO–","–CHO","–OH","–COOH"] },
+      { q: "Axit cacboxylic có nhóm chức?", a: "–COOH", opts: ["–COOH","–CHO","–OH","–CO–"] },
+      { q: "Este được tạo bởi?", a: "Axit và ancol", opts: ["Axit và ancol","Andehit và ancol","Ancol và xeton","Hai ancol"] },
+      { q: "Phản ứng đặc trưng của axit cacboxylic là?", a: "Trung hoà với bazơ", opts: ["Trung hoà với bazơ","Oxi hoá","Khử","Cộng H₂"] }
+    ]
+  };
+  
+  // ======================== CODE HIỂN THỊ ========================
+  const chaptersDiv = document.getElementById("chapters");
+  const lessonsDiv = document.getElementById("lessons");
+  const lessonDetail = document.getElementById("lessonDetail");
+  const contentDiv = document.getElementById("content");
+  
+  // Hiển thị danh sách chương
+  data.forEach((ch, i) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.textContent = ch.title;
+    div.onclick = () => openChapter(i + 1);
+    chaptersDiv.appendChild(div);
+  });
+  
+  function openChapter(id) {
+    chaptersDiv.style.display = "none";
+    lessonsDiv.classList.add("active");
+    lessonsDiv.innerHTML = `<h2>${data[id-1].title}</h2>`;
+    data[id - 1].lessons.forEach((b, i) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.textContent = b;
+      card.onclick = () => openLesson(id, i + 1);
+      lessonsDiv.appendChild(card);
+    });
+    const back = document.createElement("div");
+    back.className = "back";
+    back.textContent = "← Quay lại danh sách chương";
+    back.onclick = () => {
+      lessonsDiv.classList.remove("active");
+      chaptersDiv.style.display = "block";
+    };
+    lessonsDiv.appendChild(back);
+  }
+  
+  function openLesson(ch, b) {
+    lessonsDiv.classList.remove("active");
+    lessonDetail.classList.add("active");
+    const title = data[ch - 1].lessons[b - 1];
+    lessonDetail.innerHTML = `<h2>${title}</h2>
+    <button class="btn" onclick="showTheory(${ch},${b})">📖 Lý thuyết</button>
+    <button class="btn" onclick="showQuiz(${ch})">🧪 Bài tập trắc nghiệm</button>
+    <div class="back" onclick="backToLessons(${ch})">← Quay lại danh sách bài</div>`;
+  }
+  
+  function showTheory(ch, b) {
+    lessonDetail.classList.remove("active");
+    contentDiv.classList.add("active");
+    contentDiv.innerHTML = `<h2>${data[ch-1].lessons[b-1]} - Lý thuyết</h2>
+    <input type="text" id="link" placeholder="Dán link YouTube hoặc tài liệu...">
+    <button class="btn" onclick="loadVideo()">Hiển thị</button>
+    <div id="videoArea"></div>
+    <div class="back" onclick="backToLesson(${ch},${b})">← Quay lại</div>`;
+  }
+  
+  function loadVideo() {
+    const link = document.getElementById("link").value;
+    const videoArea = document.getElementById("videoArea");
+    if (link.includes("youtube")) {
+      const id = link.split("v=")[1];
+      videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;
+    } else {
+      videoArea.innerHTML = `<a href="${link}" target="_blank" style="color:var(--accent2)">Mở tài liệu tại đây</a>`;
+    }
+  }
+  
+  function showQuiz(ch) {
+    lessonDetail.classList.remove("active");
+    contentDiv.classList.add("active");
+    let qList = quiz[ch] || [];
+    if (qList.length > 5) {
+      qList = qList.sort(() => Math.random() - 0.5).slice(0, 5);
+    }
+  
+    let html = `<h2>Bài tập trắc nghiệm</h2>`;
+    qList.forEach((q, i) => {
+      html += `<div class="question" id="q${ch}_${i}">
+        <strong>${i + 1}. ${q.q}</strong><br>`;
+      q.opts.forEach(opt => {
+        html += `<div class="option" onclick="checkAnswer(${ch}, ${i}, '${opt}', this)">${opt}</div>`;
+      });
+      html += `<div class='result'></div></div>`;
+    });
+    html += `<div class="back" onclick="backToLesson(${ch},1)">← Quay lại</div>`;
+    contentDiv.innerHTML = html;
+  }
+  
+  function checkAnswer(ch, i, opt, el) {
+    const parent = el.parentElement;
+    const qText = parent.querySelector("strong").textContent.slice(3);
+    const q = quiz[ch].find(item => qText.includes(item.q.slice(0, 10)));
+    const resultDiv = parent.querySelector(".result");
+    if (!resultDiv.textContent) {
+      if (opt === q.a) {
+        resultDiv.innerHTML = "<p style='color:lightgreen;'>✅ Đúng rồi!</p>";
+      } else {
+        resultDiv.innerHTML = `<p style='color:#ff6b6b;'>❌ Sai, đáp án đúng là: <b>${q.a}</b></p>`;
+      }
+    }
+  }
+  
+  function backToLessons(ch) {
+    lessonDetail.classList.remove("active");
+    openChapter(ch);
+  }
+  
+  function backToLesson(ch, b) {
+    contentDiv.classList.remove("active");
+    openLesson(ch, b);
+  }
+  </script>
+  
+<!-- Nút quay lại trang chính -->
+<div style="margin-top:30px;">
+  <button class="btn" onclick="window.location.href='index.html'">
+    ← Quay lại trang chính
+  </button>
+</body>
+</html>

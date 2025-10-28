@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📘 Tiếng Anh 11</title>
+<style>
+  :root {
+    --bg: #0e1726;
+    --card: #13202b;
+    --accent1: #f39c12; /* cam */
+    --accent2: #3498db; /* xanh dương nhạt */
+    --text: #e6eef8;
+    --muted: #94a3b8;
+  }
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    text-align: center;
+  }
+  h1 { color: var(--accent2); }
+  .chapter, .lesson, .content { display: none; }
+  .active { display: block; }
+  .card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 12px;
+    margin: 10px auto;
+    max-width: 500px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .card:hover { transform: scale(1.03); border: 1px solid var(--accent1); }
+  .btn {
+    background: var(--accent1);
+    color: var(--bg);
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  iframe {
+    width: 100%; height: 360px; border: none; border-radius: 8px; margin-top: 10px;
+  }
+  .question {
+    background: var(--card);
+    margin: 10px auto;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 600px;
+    text-align: left;
+  }
+  .option label{ cursor:pointer; }
+  .option input{ margin-right:8px; }
+  .option {
+    display: block;
+    background: #1a2e3f;
+    margin: 6px 0;
+    padding: 8px;
+    border-radius: 8px;
+    transition: 0.2s;
+  }
+  .option:hover { background: var(--accent2); color: var(--bg); }
+  .back {
+    display: block;
+    margin: 20px auto;
+    color: var(--accent2);
+    cursor: pointer;
+  }
+  input[type=text]{
+    width:90%; padding:8px; border-radius:6px; border:1px solid #2b3f52; background:#09131b; color:var(--text);
+  }
+  .result {
+    margin: 20px auto;
+    color: var(--accent1);
+  }
+  .answer{ margin-top:8px; color:var(--accent1); }
+  pre.passage{background:#08111a;padding:12px;border-radius:8px;text-align:left;white-space:pre-wrap;max-width:820px;margin:0 auto}
+</style>
+</head>
+<body>
+
+<h1>📘 Tiếng Anh</h1>
+<p>Chọn Unit để bắt đầu học</p>
+
+<div id="chapters"></div>
+<div id="lessons" class="chapter"></div>
+<div id="lessonDetail" class="lesson"></div>
+<div id="content" class="content"></div>
+
+<script>
+const data = [
+  { title: "Unit 1: The Generation Gap", reading: {
+      passage: `The generation gap refers to differences in opinions, values and attitudes between people of different ages. In many families, parents and teenagers disagree about music, study habits, technology use and social behaviour. While older generations often value stability and tradition, younger people tend to embrace change and new ideas. Communication and mutual respect help narrow the gap. By listening to each other and finding shared goals, families can reduce conflict and build stronger relationships.`,
+      questions: [
+        {q: '1. The phrase "generation gap" mainly means a difference in', opts:['fashion styles','age-related values and attitudes','geographical location','income levels'], a: 'age-related values and attitudes'},
+        {q: '2. According to the passage, younger people often:', opts:['value stability','embrace change','reject new ideas','prefer tradition'], a: 'embrace change'},
+        {q: '3. The passage suggests the best way to reduce conflict is to:', opts:['ignore disagreements','punish the younger generation','communicate and show mutual respect','change one’s values'], a: 'communicate and show mutual respect'},
+        {q: '4. Which topic is NOT mentioned as a source of disagreement?', opts:['music','technology use','study habits','political parties'], a: 'political parties'},
+        {q: '5. The tone of the passage is:', opts:['hostile','informative and constructive','sarcastic','dramatic'], a: 'informative and constructive'}
+      ]
+    }, vocab: [
+      {q:'1. "Attitude" most nearly means:', opts:['a friendly place','a way of thinking','a musical style','a house'], a:'a way of thinking'},
+      {q:'2. "Stability" is closest in meaning to:', opts:['change','peacefulness and steadiness','noise','movement'], a:'peacefulness and steadiness'},
+      {q:'3. "Embrace" in the passage means:', opts:['to hug someone','to accept willingly','to remove','to hide'], a:'to accept willingly'},
+      {q:'4. "Mutual" means:', opts:['one-sided','shared by two or more','related to music','extreme'], a:'shared by two or more'},
+      {q:'5. "Reduce" is opposite to:', opts:['decrease','lessen','increase','diminish'], a:'increase'}
+    ], grammar: [
+      {q:'1. Choose the correct form: "She ___ to new ideas quickly."', opts:['adapt','adapts','adapting','adapted'], a:'adapts'},
+      {q:'2. Select correct tense: "By listening, families ___ better."', opts:['communicate','communicated','will communicate','can communicate'], a:'can communicate'},
+      {q:'3. Correct preposition: "differences ___ opinions"', opts:['on','in','of','between'], a:'in'},
+      {q:'4. Choose article: "___ generation gap is common."', opts:['A','An','The','No article'], a:'The'},
+      {q:'5. Correct comparative: "Younger people are ___ open to change."', opts:['more','most','as','least'], a:'more'}
+    ]},
+
+  { title: 'Unit 2: Relationships', reading: {
+      passage: `Relationships are the connections we form with family, friends and colleagues. Good relationships require trust, communication and compromise. While romantic relationships gain a lot of attention, friendships and professional ties are equally important for emotional support and personal growth. Investing time and effort into relationships pays off in long-term wellbeing.`,
+      questions: [
+        {q:'1. Which of the following is NOT listed as necessary for good relationships?', opts:['trust','communication','compromise','wealth'], a:'wealth'},
+        {q:'2. The passage implies that friendships are:', opts:['less important than romantic relationships','also important','always easy','unnecessary'], a:'also important'},
+        {q:'3. "Investing time" most nearly means:', opts:['spending time','saving money','planting trees','buying gifts'], a:'spending time'},
+        {q:'4. Professional ties provide:', opts:['emotional support and growth','only money','no benefits','isolation'], a:'emotional support and growth'},
+        {q:'5. The passage’s main idea is about:', opts:['economic growth','types and value of relationships','diet and health','sports'], a:'types and value of relationships'}
+      ]
+    }, vocab:[
+      {q:'1. "Compromise" means:', opts:['agreement reached by mutual concession','a type of sandwich','a fight','a gift'], a:'agreement reached by mutual concession'},
+      {q:'2. "Colleague" =', opts:['a family member','a workmate','a stranger','a teacher'], a:'a workmate'},
+      {q:'3. "Wellbeing" relates to:', opts:['health and happiness','fame','wealth only','travel'], a:'health and happiness'},
+      {q:'4. "Require" is similar to:', opts:['need','reject','avoid','hide'], a:'need'},
+      {q:'5. "Gain attention" =', opts:['lose notice','attract notice','ignore','forget'], a:'attract notice'}
+    ], grammar:[
+      {q:'1. Choose correct verb form: "They ___ close friends for years."', opts:['are','have been','had been','were'], a:'have been'},
+      {q:'2. Fill in: "She is good ___ giving advice."', opts:['at','in','on','for'], a:'at'},
+      {q:'3. Choose pronoun: "This gift is for ___ ."', opts:['I','me','my','mine'], a:'me'},
+      {q:'4. Choose correct modal: "You ___ listen carefully."', opts:['must','can','may','shouldn’t'], a:'must'},
+      {q:'5. Verb + ing: "They enjoy ___ together."', opts:['to chat','chatting','chat','chatted'], a:'chatting'}
+    ]},
+
+  { title: 'Unit 3: Becoming Independent', reading: {
+      passage: `Becoming independent is a key stage in growing up. Teenagers learn to make decisions, manage money and take responsibility for daily tasks. Independence boosts confidence but also brings challenges like time management and coping with failure. Support from family and mentors helps young people navigate this transition successfully.`,
+      questions:[
+        {q:'1. Independence helps to increase:', opts:['confidence','fear','reliance','confusion'], a:'confidence'},
+        {q:'2. A challenge mentioned is:', opts:['time management','physical strength','language learning','climate change'], a:'time management'},
+        {q:'3. The role of mentors is to:', opts:['support and guide','ignore','punish','provide money'], a:'support and guide'},
+        {q:'4. "Navigate" in this context means:', opts:['sail a boat','deal with','avoid','forget'], a:'deal with'},
+        {q:'5. Becoming independent is described as:', opts:['a key stage in growing up','useless','illegal','dangerous'], a:'a key stage in growing up'}
+      ]
+    }, vocab:[
+      {q:'1. "Mentor" is:', opts:['a guide or adviser','a type of food','a sport','a tool'], a:'a guide or adviser'},
+      {q:'2. "Manage" =', opts:['control or handle','destroy','run away','sleep'], a:'control or handle'},
+      {q:'3. "Coping" means:', opts:['dealing successfully with something difficult','escaping','fighting','forgetting'], a:'dealing successfully with something difficult'},
+      {q:'4. "Boost" =', opts:['increase','break','reduce','hide'], a:'increase'},
+      {q:'5. "Transition" is:', opts:['a process of change','a song','a machine','a book'], a:'a process of change'}
+    ], grammar:[
+      {q:'1. Choose the correct form: "He ___ to live alone last year."', opts:['begins','began','begin','beginning'], a:'began'},
+      {q:'2. Modal for advice: "You ___ save some money."', opts:['should','mustn’t','couldn’t','won’t'], a:'should'},
+      {q:'3. Choose verb form: "They are ___ more responsible."', opts:['become','becoming','became','becomes'], a:'becoming'},
+      {q:'4. Past participle: "He has ___ responsibility."', opts:['take','took','taken','taking'], a:'taken'},
+      {q:'5. Fill preposition: "Responsible ___ his actions."', opts:['for','to','of','with'], a:'for'}
+    ]
+  },
+
+  { title: 'Unit 4: Caring for Those in Need', reading: {
+      passage:`Caring for vulnerable people is a sign of a compassionate society. Volunteers, charities and individuals provide food, shelter and medical aid to those in need. Small acts—like donating clothes or offering time—can make a big difference. Public policies also play a role in ensuring long-term support and fairness.`,
+      questions:[
+        {q:'1. Which is NOT mentioned as a way to help?', opts:['donating clothes','offering time','writing laws','providing shelter'], a:'writing laws'},
+        {q:'2. The passage describes society as:', opts:['compassionate','indifferent','hostile','exclusive'], a:'compassionate'},
+        {q:'3. Long-term support is ensured by:', opts:['public policies','ignoring problems','short-term gifts','selling items'], a:'public policies'},
+        {q:'4. Volunteers provide:', opts:['aid and time','only money','only food','only shelter'], a:'aid and time'},
+        {q:'5. The writer’s attitude is:', opts:['critical','encouraging and positive','negative','sarcastic'], a:'encouraging and positive'}
+      ]
+    }, vocab:[
+      {q:'1. "Vulnerable" means:', opts:['easily harmed','very strong','expensive','hidden'], a:'easily harmed'},
+      {q:'2. "Charity" =', opts:['an organization helping others','a party','a school','a shop'], a:'an organization helping others'},
+      {q:'3. "Donate" means to:', opts:['give to those in need','buy','sell','hide'], a:'give to those in need'},
+      {q:'4. "Shelter" is:', opts:['a place providing protection','a type of food','a toy','a song'], a:'a place providing protection'},
+      {q:'5. "Aid" =', opts:['help or assistance','harm','noise','distance'], a:'help or assistance'}
+    ], grammar:[
+      {q:'1. Choose tense: "They ___ help every week."', opts:['volunteer','volunteered','will volunteer','are volunteering'], a:'volunteer'},
+      {q:'2. Passive voice: "Food ___ by volunteers."', opts:['is provided','provide','was provided','provides'], a:'is provided'},
+      {q:'3. Choose correct: "He offered to ___ clothes."', opts:['donate','donating','donated','donates'], a:'donate'},
+      {q:'4. Modal: "We ___ support them."', opts:['should','mustn’t','couldn’t','needn’t'], a:'should'},
+      {q:'5. Gerund: "Caring for people involves ___ time."', opts:['give','giving','gave','given'], a:'giving'}
+    ]
+  },
+
+  { title: 'Unit 5: Being Part of ASEAN', reading: {
+      passage:`ASEAN is a regional organization that promotes cooperation among Southeast Asian countries. Member states work together on trade, education and cultural exchange. Being part of ASEAN gives young people opportunities to study abroad, learn languages and understand regional issues, fostering mutual respect among neighbours.`,
+      questions:[
+        {q:'1. ASEAN focuses on:', opts:['regional cooperation','military conquest','space exploration','medical research only'], a:'regional cooperation'},
+        {q:'2. Benefits mentioned include:', opts:['study abroad and cultural exchange','only trade','only sports exchanges','only tourism'], a:'study abroad and cultural exchange'},
+        {q:'3. ASEAN fosters:', opts:['mutual respect','conflict','isolation','hostility'], a:'mutual respect'},
+        {q:'4. Member states collaborate on:', opts:['trade and education','only trade','only culture','only sports'], a:'trade and education'},
+        {q:'5. "Neighbour" here means:', opts:['nearby country','a friend','a house','a person next door'], a:'nearby country'}
+      ]
+    }, vocab:[
+      {q:'1. "Regional" =', opts:['local to an area','global','individual','temporary'], a:'local to an area'},
+      {q:'2. "Cooperation" means:', opts:['working together','competing','fighting','ignoring'], a:'working together'},
+      {q:'3. "Foster" =', opts:['encourage or promote','destroy','hide','ignore'], a:'encourage or promote'},
+      {q:'4. "Member" =', opts:['a country that belongs to a group','a guest','a stranger','a tourist'], a:'a country that belongs to a group'},
+      {q:'5. "Exchange" in context means:', opts:['swap or share information or culture','buying goods','selling only','closing'], a:'swap or share information or culture'}
+    ], grammar:[
+      {q:'1. Choose correct: "They ___ partners for study programs."', opts:['are','is','was','be'], a:'are'},
+      {q:'2. Fill preposition: "cooperate ___"', opts:['with','in','to','for'], a:'with'},
+      {q:'3. Passive: "Programs ___ by ASEAN."', opts:['are supported','support','supported','supports'], a:'are supported'},
+      {q:'4. Choose verb: "Young people ___ opportunities."', opts:['gain','gains','gained','gaining'], a:'gain'},
+      {q:'5. Article: "___ ASEAN is important."', opts:['A','An','The','No article'], a:'The'}
+    ]
+  },
+
+  { title: 'Unit 6: Global Warming', reading: {
+      passage:`Global warming refers to the long-term rise in Earth's average temperature due to human activities that increase greenhouse gases. Effects include rising sea levels, extreme weather and impacts on biodiversity. Addressing global warming requires international cooperation, policy changes and individual actions such as saving energy and reducing waste.`,
+      questions:[
+        {q:'1. Global warming is caused mainly by:', opts:['natural cycles only','human activities increasing greenhouse gases','aliens','astrology'], a:'human activities increasing greenhouse gases'},
+        {q:'2. An effect is:', opts:['rising sea levels','stable climate','less storms','increased ice sheets'], a:'rising sea levels'},
+        {q:'3. Solutions include:', opts:['policy changes and saving energy','doing nothing','increasing waste','ignoring science'], a:'policy changes and saving energy'},
+        {q:'4. Biodiversity relates to:', opts:['variety of life','money','sports','architecture'], a:'variety of life'},
+        {q:'5. The passage calls for:', opts:['international cooperation','isolation','war','competition'], a:'international cooperation'}
+      ]
+    }, vocab:[
+      {q:'1. "Biodiversity" =', opts:['variety of life','number of people','temperature','industry'], a:'variety of life'},
+      {q:'2. "Greenhouse gases" cause:', opts:['warming','cooling','silence','movement'], a:'warming'},
+      {q:'3. "Reduce" =', opts:['make smaller','increase','maintain','ignore'], a:'make smaller'},
+      {q:'4. "Impact" (noun) =', opts:['effect','distance','sound','color'], a:'effect'},
+      {q:'5. "Energy" here suggests:', opts:['power used in daily life','a personality trait','a book','a machine'], a:'power used in daily life'}
+    ], grammar:[
+      {q:'1. Choose tense: "Scientists ___ data about climate change."', opts:['collect','collected','will collect','are collecting'], a:'collect'},
+      {q:'2. Modal: "We ___ reduce emissions."', opts:['must','shouldn’t','couldn’t','might not'], a:'must'},
+      {q:'3. Passive: "Energy ___ saved by households."', opts:['can be','is saved','was saving','save'], a:'is saved'},
+      {q:'4. Choose correct: "Rising sea levels ___ cause flooding."', opts:['may','may be','must','should'], a:'may'},
+      {q:'5. Comparative: "Warmer years are ___ common."', opts:['more','most','less','least'], a:'more'}
+    ]
+  },
+
+  { title: 'Unit 7: Further Education', reading: {
+      passage:`Further education includes post-secondary study such as vocational courses, college diplomas or university degrees. Choosing the right path depends on interests, career goals and financial considerations. Lifelong learning is increasingly important in a fast-changing job market.`,
+      questions:[
+        {q:'1. Further education refers to:', opts:['primary school','post-secondary study','childcare','retirement homes'], a:'post-secondary study'},
+        {q:'2. Choosing a path depends on:', opts:['interests and career goals','random chance','only money','weather'], a:'interests and career goals'},
+        {q:'3. Lifelong learning is important because:', opts:['job market changes quickly','everyone is bored','it is free','it replaces school'], a:'job market changes quickly'},
+        {q:'4. Vocational courses are for:', opts:['practical skills training','only theory','fun only','no purpose'], a:'practical skills training'},
+        {q:'5. Financial considerations mean:', opts:['money-related factors','no money','fun','weather'], a:'money-related factors'}
+      ]
+    }, vocab:[
+      {q:'1. "Vocational" =', opts:['related to job skills','related to vacation','related to children','related to food'], a:'related to job skills'},
+      {q:'2. "Diploma" is:', opts:['a certificate','a game','a person','a tool'], a:'a certificate'},
+      {q:'3. "Career" =', opts:['a profession or job path','a hobby','a sentence','a place'], a:'a profession or job path'},
+      {q:'4. "Lifelong" means:', opts:['lasting all life','short','daily','weekly'], a:'lasting all life'},
+      {q:'5. "Consideration" =', opts:['thought or careful thought','noise','movement','speed'], a:'thought or careful thought'}
+    ], grammar:[
+      {q:'1. Choose form: "She ___ a diploma last year."', opts:['earned','earns','earning','earn'], a:'earned'},
+      {q:'2. Modal possibility: "You ___ study part-time."', opts:['could','mustn’t','won’t','needn’t'], a:'could'},
+      {q:'3. Choose infinitive: "He wants ___ a teacher."', opts:['to become','become','becoming','became'], a:'to become'},
+      {q:'4. Plural: "Many students ___ apply."', opts:['apply','applies','applying','applied'], a:'apply'},
+      {q:'5. Passive: "A diploma can be ___ by students."', opts:['earned','earning','earn','earns'], a:'earned'}
+    ]
+  },
+
+  { title: 'Unit 8: Our World Heritage Sites', reading: {
+      passage:`World Heritage Sites are places of outstanding cultural or natural importance. They include historic cities, monuments and natural landscapes. Preserving these sites helps maintain cultural identity and supports tourism. Local communities often participate in conservation efforts.`,
+      questions:[
+        {q:'1. World Heritage Sites are important because:', opts:['they are visually attractive only','they have outstanding cultural or natural value','they are expensive','they are secret'], a:'they have outstanding cultural or natural value'},
+        {q:'2. Preservation helps:', opts:['maintain cultural identity and support tourism','destroy the site','reduce visitors','increase pollution'], a:'maintain cultural identity and support tourism'},
+        {q:'3. Who often participates in conservation?', opts:['local communities','only governments','only tourists','nobody'], a:'local communities'},
+        {q:'4. Sites include:', opts:['historic cities and natural landscapes','only cities','only museums','only paintings'], a:'historic cities and natural landscapes'},
+        {q:'5. Preservation means:', opts:['protecting and maintaining','selling','moving away','ignoring'], a:'protecting and maintaining'}
+      ]
+    }, vocab:[
+      {q:'1. "Monument" =', opts:['a statue or structure of historical importance','a type of food','a musical instrument','a book'], a:'a statue or structure of historical importance'},
+      {q:'2. "Conservation" =', opts:['protection and careful management','neglect','destruction','sale'], a:'protection and careful management'},
+      {q:'3. "Landscape" =', opts:['a view of natural scenery','a computer program','a song','a sport'], a:'a view of natural scenery'},
+      {q:'4. "Identity" relates to:', opts:['who a person or culture is','money','age','speed'], a:'who a person or culture is'},
+      {q:'5. "Tourism" =', opts:['travel for pleasure','work only','study','farming'], a:'travel for pleasure'}
+    ], grammar:[
+      {q:'1. Choose article: "___ World Heritage Site"', opts:['A','An','The','No article'], a:'A'},
+      {q:'2. Plural: "Many monuments ___ protected."', opts:['are','is','was','be'], a:'are'},
+      {q:'3. Passive: "Sites ___ by UNESCO."', opts:['are listed','listed','list','lists'], a:'are listed'},
+      {q:'4. Choose preposition: "participate ___ conservation"', opts:['in','on','at','for'], a:'in'},
+      {q:'5. Choose verb: "They ___ tourism."', opts:['promote','promotes','promoted','promoting'], a:'promote'}
+    ]
+  },
+
+  { title: 'Unit 9: Cities of the Future', reading: {
+      passage:`Cities of the future may feature green buildings, efficient public transport and smart technology that monitors energy use. Urban planning that prioritizes sustainability can improve quality of life and reduce pollution. Community involvement and good policy are essential to create inclusive, liveable cities.`,
+      questions:[
+        {q:'1. Future cities aim to:', opts:['increase pollution','prioritize sustainability','ignore transport','ban technology'], a:'prioritize sustainability'},
+        {q:'2. "Smart technology" monitors:', opts:['energy use','only traffic','only weather','only people'], a:'energy use'},
+        {q:'3. Urban planning affects:', opts:['quality of life and pollution levels','only fashion','only food','only sports'], a:'quality of life and pollution levels'},
+        {q:'4. To make cities liveable, we need:', opts:['community involvement and good policy','no planning','only money','only technology'], a:'community involvement and good policy'},
+        {q:'5. "Green buildings" relate to:', opts:['environmentally friendly design','color of paint','height','age'], a:'environmentally friendly design'}
+      ]
+    }, vocab:[
+      {q:'1. "Sustainability" =', opts:['ability to be maintained without harming the environment','temporary action','growth only','population'], a:'ability to be maintained without harming the environment'},
+      {q:'2. "Urban" =', opts:['relating to cities','relating to farms','relating to mountains','relating to oceans'], a:'relating to cities'},
+      {q:'3. "Inclusive" means:', opts:['including different groups','exclusive','expensive','old-fashioned'], a:'including different groups'},
+      {q:'4. "Transport" =', opts:['systems for moving people or goods','a book','a song','a plant'], a:'systems for moving people or goods'},
+      {q:'5. "Policy" =', opts:['a course or principle of action','a game','a building','a person'], a:'a course or principle of action'}
+    ], grammar:[
+      {q:'1. Choose tense: "Cities ___ change over time."', opts:['will','would','are','were'], a:'will'},
+      {q:'2. Modal: "Planners ___ consider environment."', opts:['should','mustn’t','couldn’t','needn’t'], a:'should'},
+      {q:'3. Passive: "Public transport ___ by many people."', opts:['is used','uses','used','will used'], a:'is used'},
+      {q:'4. Choose correct: "Technology that monitors energy is ___."', opts:['useful','useless','dangerous','illegal'], a:'useful'},
+      {q:'5. Comparative: "This plan is ___ better than the old one."', opts:['much','most','less','least'], a:'much'}
+    ]
+  },
+
+  { title: 'Unit 10: Healthy Lifestyle and Longevity', reading: {
+      passage:`A healthy lifestyle includes balanced diet, regular exercise and sufficient sleep. These habits reduce the risk of chronic disease and contribute to longevity. Mental health, social relationships and stress management are also key elements of a long and fulfilling life.`,
+      questions:[
+        {q:'1. Which is NOT part of a healthy lifestyle?', opts:['balanced diet','regular exercise','sufficient sleep','excessive junk food'], a:'excessive junk food'},
+        {q:'2. Healthy habits reduce the risk of:', opts:['chronic disease','happiness','artistic skill','competition'], a:'chronic disease'},
+        {q:'3. Mental health is:', opts:['an important element of longevity','irrelevant','only physical','a food'], a:'an important element of longevity'},
+        {q:'4. Managing stress helps to:', opts:['lead a fulfilling life','increase illness','reduce sleep','cause loneliness'], a:'lead a fulfilling life'},
+        {q:'5. Longevity means:', opts:['long life','short life','fast life','young age'], a:'long life'}
+      ]
+    }, vocab:[
+      {q:'1. "Diet" =', opts:['types of food eaten regularly','a book','a building','a sport'], a:'types of food eaten regularly'},
+      {q:'2. "Chronic" means:', opts:['long-lasting','short-term','new','temporary'], a:'long-lasting'},
+      {q:'3. "Longevity" =', opts:['long life','speed','height','wealth'], a:'long life'},
+      {q:'4. "Stress management" refers to:', opts:['ways to cope with pressure','ignoring problems','sleeping less','eating more'], a:'ways to cope with pressure'},
+      {q:'5. "Fulfill" (life) =', opts:['make life satisfying','end life','shorten life','ignore life'], a:'make life satisfying'}
+    ], grammar:[
+      {q:'1. Choose correct form: "He exercises ___ three times a week."', opts:['about','at','on','in'], a:'about'},
+      {q:'2. Modal: "You ___ eat more vegetables."', opts:['should','mustn’t','couldn’t','won’t'], a:'should'},
+      {q:'3. Gerund: "Regular exercise involves ___ effort."', opts:['take','taking','took','taken'], a:'taking'},
+      {q:'4. Comparative: "A balanced diet is ___ important than fast food."', opts:['more','most','less','least'], a:'more'},
+      {q:'5. Fill preposition: "Sleep is essential ___ health."', opts:['for','to','of','with'], a:'for'}
+    ]
+  }
+];
+
+// UI - giống các file khác
+const chaptersDiv = document.getElementById("chapters");
+const lessonsDiv = document.getElementById("lessons");
+const lessonDetail = document.getElementById("lessonDetail");
+const contentDiv = document.getElementById("content");
+let lastOpened = { ch: null, part: null };
+
+// Hiển thị các Unit
+data.forEach((u, i) => {
+  const div = document.createElement("div");
+  div.className = "card";
+  div.textContent = u.title;
+  div.onclick = () => openUnit(i + 1);
+  chaptersDiv.appendChild(div);
+});
+
+function openUnit(id){
+  chaptersDiv.style.display = "none";
+  lessonsDiv.classList.add("active");
+  lessonsDiv.innerHTML = `<h2>${data[id-1].title}</h2>`;
+  ["Reading","Vocabulary","Grammar"].forEach((p, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.textContent = p;
+    card.onclick = () => openPart(id, idx);
+    lessonsDiv.appendChild(card);
+  });
+  const back = document.createElement("div");
+  back.className = "back";
+  back.textContent = "← Quay lại danh sách Unit";
+  back.onclick = () => { lessonsDiv.classList.remove("active"); chaptersDiv.style.display = "block"; };
+  lessonsDiv.appendChild(back);
+}
+
+function openPart(unitId, partIndex){
+  lastOpened = { ch: unitId, part: partIndex };
+  lessonsDiv.classList.remove("active");
+  lessonDetail.classList.add("active");
+  const title = (partIndex===0)?'Reading':(partIndex===1)?'Vocabulary':'Grammar';
+  lessonDetail.innerHTML = `<h2>${data[unitId-1].title} — ${title}</h2>
+  <button class=\"btn\" onclick=\"showContent(${unitId},${partIndex})\">Mở phần</button>
+  <div class=\"back\" onclick=\"backToUnits(${unitId})\">← Quay lại phần</div>`;
+}
+
+function showContent(unitId, partIndex){
+  lessonDetail.classList.remove("active");
+  contentDiv.classList.add("active");
+  const unit = data[unitId-1];
+  let html = `<h2>${unit.title} — ${(partIndex===0)?'Reading':(partIndex===1)?'Vocabulary':'Grammar'}</h2>`;
+  if(partIndex===0){
+    html += `<pre class='passage'>${unit.reading.passage}</pre>`;
+    unit.reading.questions.forEach((q, i) => {
+      html += `<div class='question' id='q_r${i}'><strong>${q.q}</strong><br>`;
+      q.opts.forEach(opt => { html += `<div class='option'><label><input type='radio' name='q_r${i}' value='${opt}'> ${opt}</label></div>`; });
+      html += `</div>`;
+    });
+    html += `<button class='btn' onclick='submitSection(${unitId},"reading")'>Kiểm tra kết quả</button>`;
+  } else if(partIndex===1){
+    unit.vocab.forEach((q, i) => {
+      html += `<div class='question' id='q_v${i}'><strong>${q.q}</strong><br>`;
+      q.opts.forEach(opt => { html += `<div class='option'><label><input type='radio' name='q_v${i}' value='${opt}'> ${opt}</label></div>`; });
+      html += `</div>`;
+    });
+    html += `<button class='btn' onclick='submitSection(${unitId},"vocab")'>Kiểm tra kết quả</button>`;
+  } else {
+    unit.grammar.forEach((q, i) => {
+      html += `<div class='question' id='q_g${i}'><strong>${q.q}</strong><br>`;
+      q.opts.forEach(opt => { html += `<div class='option'><label><input type='radio' name='q_g${i}' value='${opt}'> ${opt}</label></div>`; });
+      html += `</div>`;
+    });
+    html += `<button class='btn' onclick='submitSection(${unitId},"grammar")'>Kiểm tra kết quả</button>`;
+  }
+  html += `<div id='result' class='result'></div>`;
+  html += `<div class='back' onclick='backToPart(${unitId})'>← Quay lại</div>`;
+  contentDiv.innerHTML = html;
+}
+
+function submitSection(unitId, section){
+  const unit = data[unitId-1];
+  const qList = (section==='reading')?unit.reading.questions:(section==='vocab')?unit.vocab:unit.grammar;
+  let correct = 0;
+  qList.forEach((q, i) => {
+    const name = (section==='reading')?`q_r${i}`:(section==='vocab')?`q_v${i}`:`q_g${i}`;
+    const selected = document.querySelector(`input[name='${name}']:checked`);
+    const questionDiv = document.getElementById(name);
+    const oldAns = questionDiv.querySelector('.answer');
+    if(oldAns) oldAns.remove();
+    if(selected && selected.value === q.a){ correct++; }
+    else { const ans = document.createElement('div'); ans.className = 'answer'; ans.textContent = `Đáp án đúng: ${q.a}`; questionDiv.appendChild(ans); }
+  });
+  const total = qList.length;
+  const resultDiv = document.getElementById('result');
+  resultDiv.textContent = `Kết quả: ${correct}/${total} câu đúng`;
+  const retry = document.createElement('button'); retry.className = 'btn'; retry.textContent = 'Làm lại'; retry.onclick = () => showContent(unitId, (section==='reading')?0:(section==='vocab')?1:2);
+  resultDiv.appendChild(document.createElement('br'));
+  resultDiv.appendChild(retry);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function backToUnits(u){ lessonDetail.classList.remove('active'); openUnit(u); }
+function backToPart(u){ contentDiv.classList.remove('active'); openPart(u, lastOpened.part); }
+
+</script>
+<!-- Nút quay lại trang chính -->
+<div style="margin-top:30px;">
+  <button class="btn" onclick="window.location.href='index.html'">
+    ← Quay lại trang chính
+  </button>
+</body>
+</html>

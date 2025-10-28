@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vật Lí 11 - Kết Nối Tri Thức</title>
+<style>
+  :root {
+    --bg: #0e1726;
+    --card: #1a2333;
+    --accent1: #00b4d8;
+    --accent2: #ff9f43;
+    --text: #e6eef8;
+    --muted: #94a3b8;
+  }
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    text-align: center;
+  }
+  h1 { color: var(--accent1); }
+  .chapter, .lesson, .content { display: none; }
+  .active { display: block; }
+  .card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 12px;
+    margin: 10px auto;
+    max-width: 500px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .card:hover { transform: scale(1.03); border: 1px solid var(--accent1); }
+  .btn {
+    background: var(--accent1);
+    color: var(--bg);
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+  }
+  .file-preview {
+    width: 90%; height: 400px; border: 1px solid var(--muted);
+    border-radius: 8px; margin: 20px auto; overflow: auto;
+    text-align: left; padding: 15px; background: #122033; white-space: pre-wrap;
+  }
+  .question { background: var(--card); margin: 10px auto; padding: 10px;
+    border-radius: 10px; max-width: 600px; text-align: left; }
+  .question-header { margin-bottom: 10px; font-weight: bold; color: var(--accent2); }
+  .option {
+    display: block; background: #122033; margin: 6px 0; padding: 8px;
+    border-radius: 8px; cursor: pointer; transition: 0.3s;
+  }
+  .option:hover { background: var(--accent1); color: var(--bg); }
+  .option.selected { background: var(--accent2); color: var(--bg); }
+  .back { display: block; margin: 20px auto; color: var(--accent1); cursor: pointer; }
+  .result { margin-top: 10px; font-weight: bold; }
+  .file-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #122033; padding: 8px 12px; margin: 6px 0;
+    border-radius: 8px; font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<h1>⚡ Vật Lí 11 - Kết Nối Tri Thức</h1>
+<p>Chọn chương để bắt đầu học</p>
+
+<div id="chapters"></div>
+<div id="lessons" class="chapter"></div>
+<div id="lessonDetail" class="lesson"></div>
+<div id="content" class="content"></div>
+
+<script>
+  // ======================== DỮ LIỆU CÁC CHƯƠNG ========================
+  const data = [
+    { title: "Chương 1: Dao động cơ", lessons: [
+      "Bài 1: Dao động điều hòa",
+      "Bài 2: Con lắc lò xo",
+      "Bài 3: Con lắc đơn",
+      "Bài 4: Tổng hợp dao động điều hòa",
+      "Bài 5: Năng lượng trong dao động cơ"
+    ]},
+    { title: "Chương 2: Sóng cơ và sự truyền sóng cơ", lessons: [
+      "Bài 6: Sóng cơ và đặc trưng của sóng cơ",
+      "Bài 7: Giao thoa sóng",
+      "Bài 8: Sóng dừng",
+      "Bài 9: Phản xạ sóng"
+    ]},
+    { title: "Chương 3: Dòng điện xoay chiều", lessons: [
+      "Bài 10: Khái niệm dòng điện xoay chiều",
+      "Bài 11: Mạch R, L, C",
+      "Bài 12: Cộng hưởng điện",
+      "Bài 13: Công suất và hệ số công suất",
+      "Bài 14: Máy biến áp và truyền tải điện năng"
+    ]},
+    { title: "Chương 4: Dao động và sóng điện từ", lessons: [
+      "Bài 15: Dao động điện từ",
+      "Bài 16: Sóng điện từ"
+    ]},
+    { title: "Chương 5: Sóng ánh sáng", lessons: [
+      "Bài 17: Giao thoa ánh sáng",
+      "Bài 18: Nhiễu xạ ánh sáng",
+      "Bài 19: Tán sắc ánh sáng"
+    ]},
+    { title: "Chương 6: Lượng tử ánh sáng", lessons: [
+      "Bài 20: Hiện tượng quang điện",
+      "Bài 21: Thuyết lượng tử ánh sáng"
+    ]}
+  ];
+  
+  // ======================== NGÂN HÀNG CÂU HỎI ========================
+  const quiz = {
+    // ===== CHƯƠNG 1 =====
+    1: [
+      { q: "Dao động điều hòa là dao động có phương trình dạng?", a: "x = A cos(ωt + φ)", opts: ["x = Aωt","x = A sin t","x = A cos(ωt + φ)","x = A + ωt"] },
+      { q: "Chu kỳ dao động T được tính bằng công thức nào?", a: "T = 2π√(m/k)", opts: ["T = k/m","T = 2π√(m/k)","T = 2π√(k/m)","T = 1/f"] },
+      { q: "Tần số dao động f có đơn vị là?", a: "Hz", opts: ["m","s","Hz","N"] },
+      { q: "Biên độ A là đại lượng đặc trưng cho?", a: "Li độ cực đại", opts: ["Tốc độ lớn nhất","Gia tốc cực đại","Li độ cực đại","Chu kỳ"] },
+      { q: "Khi vật đi qua vị trí cân bằng, thế năng bằng?", a: "0", opts: ["Cực đại","Cực tiểu","0","Không xác định"] },
+      { q: "Khi vật ở biên, động năng bằng?", a: "0", opts: ["0","Cực đại","Bằng thế năng","Không đổi"] },
+      { q: "Phương trình dao động có pha ban đầu φ cho biết?", a: "Trạng thái dao động tại t = 0", opts: ["Biên độ","Chu kỳ","Tần số","Trạng thái dao động tại t = 0"] },
+      { q: "Tốc độ cực đại trong dao động điều hòa bằng?", a: "vmax = ωA", opts: ["vmax = Aω","vmax = ωA","vmax = k/m","vmax = A/T"] },
+      { q: "Gia tốc trong dao động điều hòa tỉ lệ với?", a: "Li độ và ngược dấu", opts: ["Li độ và cùng dấu","Li độ và ngược dấu","Tốc độ","Thế năng"] },
+      { q: "Pha dao động tại thời điểm t là?", a: "ωt + φ", opts: ["φ","ωt","ωt + φ","ω + φt"] },
+      { q: "Con lắc lò xo dao động với chu kỳ phụ thuộc vào?", a: "Khối lượng và độ cứng lò xo", opts: ["Biên độ","Khối lượng và độ cứng lò xo","Tốc độ ban đầu","Chiều dài lò xo"] },
+      { q: "Chu kỳ con lắc đơn phụ thuộc vào?", a: "Chiều dài dây và g", opts: ["Khối lượng vật","Chiều dài dây và g","Biên độ","Gia tốc đầu"] },
+      { q: "Công thức tính cơ năng dao động cơ:", a: "W = 1/2 kA²", opts: ["W = 1/2 mA²","W = 1/2 kA²","W = mgh","W = 1/2 mv²"] },
+      { q: "Khi dao động không tắt dần, cơ năng:", a: "Không đổi theo thời gian", opts: ["Tăng","Giảm","Không đổi theo thời gian","Không xác định"] },
+      { q: "Dao động tắt dần là dao động có:", a: "Biên độ giảm dần theo thời gian", opts: ["Biên độ tăng","Tần số tăng","Biên độ giảm dần theo thời gian","Không đổi"] },
+      { q: "Dao động cưỡng bức xảy ra khi?", a: "Có ngoại lực tuần hoàn tác dụng", opts: ["Không có lực cản","Không có dao động riêng","Có ngoại lực tuần hoàn tác dụng","Tần số bằng 0"] },
+      { q: "Cộng hưởng dao động xảy ra khi?", a: "Tần số ngoại lực bằng tần số riêng", opts: ["Hai biên độ bằng nhau","Lực cản nhỏ","Tần số ngoại lực bằng tần số riêng","Không có lực cản"] },
+      { q: "Đại lượng đặc trưng cho độ nhanh chậm dao động là?", a: "Tần số góc ω", opts: ["Biên độ","Tần số góc ω","Pha ban đầu","Cơ năng"] },
+      { q: "Khi tăng khối lượng m, chu kỳ con lắc lò xo sẽ?", a: "Tăng", opts: ["Giảm","Không đổi","Tăng","Bằng 0"] },
+      { q: "Khi tăng độ cứng k, chu kỳ con lắc lò xo sẽ?", a: "Giảm", opts: ["Tăng","Không đổi","Giảm","Bằng 0"] }
+    ],
+  // ===== CHƯƠNG 2 =====
+  2: [
+    { q: "Sóng cơ là dao động được truyền đi trong?", a: "Môi trường vật chất", opts: ["Chân không","Môi trường vật chất","Không khí","Không gian"] },
+    { q: "Đại lượng đặc trưng cho độ nhanh của sóng là?", a: "Tốc độ truyền sóng", opts: ["Bước sóng","Biên độ","Tốc độ truyền sóng","Chu kỳ"] },
+    { q: "Sóng truyền năng lượng nhưng không truyền?", a: "Chất", opts: ["Năng lượng","Chất","Vận tốc","Pha"] },
+    { q: "Công thức liên hệ giữa tốc độ, bước sóng và chu kỳ?", a: "v = λ/T", opts: ["v = λT","v = λ/T","v = T/λ","v = λ + T"] },
+    { q: "Trong sóng cơ, phần tử vật chất dao động quanh?", a: "Vị trí cân bằng", opts: ["Gốc toạ độ","Điểm biên","Vị trí cân bằng","Đỉnh sóng"] },
+    { q: "Sóng dọc là sóng có phương dao động?", a: "Trùng phương truyền sóng", opts: ["Vuông góc","Trùng phương truyền sóng","Nghiêng 45°","Không xác định"] },
+    { q: "Sóng ngang là sóng có phương dao động?", a: "Vuông góc với phương truyền sóng", opts: ["Cùng hướng","Ngược hướng","Vuông góc với phương truyền sóng","Không xác định"] },
+    { q: "Bước sóng λ là?", a: "Quãng đường sóng truyền trong một chu kỳ", opts: ["Quãng đường sóng truyền trong một chu kỳ","Tốc độ sóng","Độ dài cực đại","Độ lệch pha"] },
+    { q: "Giao thoa sóng là hiện tượng?", a: "Hai sóng gặp nhau tạo sóng mới", opts: ["Hai sóng gặp nhau tạo sóng mới","Phản xạ","Khúc xạ","Nhiễu xạ"] },
+    { q: "Điều kiện để có giao thoa sóng ổn định?", a: "Hai nguồn cùng tần số, cùng biên độ", opts: ["Khác tần số","Cùng pha và biên độ","Hai nguồn cùng tần số, cùng biên độ","Khác pha"] },
+    { q: "Cực đại giao thoa là nơi hai sóng gặp nhau?", a: "Cùng pha", opts: ["Cùng pha","Ngược pha","Vuông pha","Không xác định"] },
+    { q: "Cực tiểu giao thoa là nơi hai sóng gặp nhau?", a: "Ngược pha", opts: ["Ngược pha","Cùng pha","Không pha","Lệch pha 0°"] },
+    { q: "Sóng dừng được hình thành khi?", a: "Hai sóng cùng tần số, ngược chiều, cùng biên độ", opts: ["Khác tần số","Khác biên độ","Hai sóng cùng tần số, ngược chiều, cùng biên độ","Cùng chiều"] },
+    { q: "Nút sóng là điểm?", a: "Dao động có biên độ bằng 0", opts: ["Biên độ lớn nhất","Dao động mạnh nhất","Dao động có biên độ bằng 0","Không dao động"] },
+    { q: "Bụng sóng là điểm?", a: "Dao động có biên độ cực đại", opts: ["Biên độ cực đại","Biên độ 0","Không xác định","Không đổi"] },
+    { q: "Khoảng cách giữa hai nút liên tiếp là?", a: "λ/2", opts: ["λ/4","λ/2","λ","2λ"] },
+    { q: "Tốc độ truyền sóng phụ thuộc vào?", a: "Môi trường truyền sóng", opts: ["Tần số","Biên độ","Môi trường truyền sóng","Bước sóng"] },
+    { q: "Hiện tượng phản xạ sóng xảy ra khi?", a: "Sóng gặp vật cản", opts: ["Sóng gặp vật cản","Hai sóng gặp nhau","Khúc xạ","Tán sắc"] },
+    { q: "Khi sóng truyền từ môi trường này sang môi trường khác, đại lượng không đổi là?", a: "Tần số", opts: ["Tốc độ","Bước sóng","Tần số","Chu kỳ"] },
+    { q: "Năng lượng sóng tỉ lệ với?", a: "Bình phương biên độ", opts: ["Biên độ","Bình phương biên độ","Tần số","Chu kỳ"] }
+  ],
+
+  // ===== CHƯƠNG 3 =====
+  3: [
+    { q: "Dòng điện xoay chiều có cường độ biến thiên theo?", a: "Hàm sin theo thời gian", opts: ["Đường thẳng","Hàm sin theo thời gian","Hàm bậc hai","Không đổi"] },
+    { q: "Giá trị hiệu dụng của dòng điện xoay chiều ký hiệu là?", a: "I hiệu dụng", opts: ["I cực đại","I trung bình","I hiệu dụng","I tức thời"] },
+    { q: "Quan hệ giữa I0 và I hiệu dụng?", a: "I0 = √2 × I", opts: ["I0 = I/√2","I0 = √2 × I","I0 = 2I","I0 = I"] },
+    { q: "Hiệu điện thế tức thời u được tính bởi?", a: "u = U0 cos(ωt + φ)", opts: ["u = U0 sin t","u = U0 cos(ωt + φ)","u = U0t","u = U0 + ωt"] },
+    { q: "Công thức liên hệ giữa điện áp hiệu dụng và cực đại?", a: "U0 = √2 U", opts: ["U0 = 2U","U0 = √2 U","U0 = U","U0 = U/√2"] },
+    { q: "Trong mạch chỉ có điện trở thuần, điện áp và dòng điện...", a: "Cùng pha", opts: ["Lệch pha π/2","Cùng pha","Ngược pha","Vuông pha"] },
+    { q: "Trong mạch chỉ có cuộn cảm thuần, dòng điện...", a: "Chậm pha π/2 so với điện áp", opts: ["Nhanh pha","Chậm pha π/2","Cùng pha","Ngược pha"] },
+    { q: "Trong mạch chỉ có tụ điện, dòng điện...", a: "Nhanh pha π/2 so với điện áp", opts: ["Chậm pha","Nhanh pha π/2","Ngược pha","Không đổi"] },
+    { q: "Công suất tức thời p = ?", a: "p = ui", opts: ["p = u/i","p = ui","p = u + i","p = u - i"] },
+    { q: "Công suất trung bình P = ?", a: "P = U I cosφ", opts: ["P = U I sinφ","P = U I cosφ","P = U/I","P = UI/2"] },
+    { q: "Hệ số công suất cosφ có giá trị tối đa là?", a: "1", opts: ["0","1",">1","<0"] },
+    { q: "Cộng hưởng điện xảy ra khi?", a: "ZL = ZC", opts: ["ZL = ZC","R = L","L = C","φ = 0"] },
+    { q: "Máy biến áp hoạt động dựa trên hiện tượng?", a: "Cảm ứng điện từ", opts: ["Từ hoá","Điện phân","Cảm ứng điện từ","Tán xạ"] },
+    { q: "Công suất truyền tải điện năng phụ thuộc vào?", a: "Điện áp truyền tải", opts: ["Điện áp truyền tải","Chiều dài dây","Tần số","Điện trở tải"] },
+    { q: "Muốn giảm hao phí điện năng khi truyền tải, cần?", a: "Tăng điện áp truyền tải", opts: ["Giảm điện áp","Tăng điện áp truyền tải","Giảm công suất","Tăng dòng điện"] },
+    { q: "Dòng điện xoay chiều có thể biến đổi nhờ?", a: "Máy biến áp", opts: ["Biến trở","Máy biến áp","Tụ điện","Cuộn cảm"] },
+    { q: "Dòng điện xoay chiều có tần số f ở Việt Nam là?", a: "50 Hz", opts: ["60 Hz","100 Hz","50 Hz","25 Hz"] },
+    { q: "Biểu thức của cảm kháng?", a: "ZL = ωL", opts: ["ZL = L/ω","ZL = ωL","ZL = 1/ωL","ZL = Lω²"] },
+    { q: "Biểu thức của dung kháng?", a: "ZC = 1/(ωC)", opts: ["ZC = ωC","ZC = 1/(ωC)","ZC = C/ω","ZC = ω/C"] },
+    { q: "Trong mạch RLC nối tiếp, tổng trở Z = ?", a: "√(R² + (ZL - ZC)²)", opts: ["R + ZL + ZC","R² + ZL² + ZC²","√(R² + (ZL - ZC)²)","R(ZL - ZC)"] }
+  ],
+  // ===== CHƯƠNG 4 =====
+  4: [
+    { q: "Dao động điện từ trong mạch LC là?", a: "Dao động điều hòa", opts: ["Không điều hòa","Dao động điều hòa","Tắt dần","Không xác định"] },
+    { q: "Thành phần năng lượng trong dao động điện từ gồm?", a: "Điện trường và từ trường", opts: ["Điện trường","Từ trường","Điện và từ trường","Cơ học"] },
+    { q: "Tần số dao động riêng của mạch LC được tính bằng?", a: "f = 1/(2π√(LC))", opts: ["f = LC","f = 1/(LC)","f = 1/(2π√(LC))","f = 2π√(LC)"] },
+    { q: "Sóng điện từ là sự lan truyền của?", a: "Điện trường và từ trường biến thiên", opts: ["Điện tích","Điện trường và từ trường biến thiên","Từ trường","Nhiệt năng"] },
+    { q: "Sóng điện từ truyền được trong?", a: "Chân không và vật chất", opts: ["Chân không","Vật chất","Chân không và vật chất","Không khí"] }
+  ],
+
+  // ===== CHƯƠNG 5 =====
+  5: [
+    { q: "Giao thoa ánh sáng chứng minh bản chất?", a: "Sóng của ánh sáng", opts: ["Hạt","Sóng","Điện","Từ"] },
+    { q: "Hiện tượng tán sắc ánh sáng là?", a: "Phân tách ánh sáng trắng thành nhiều màu", opts: ["Phản xạ ánh sáng","Tán xạ ánh sáng","Phân tách ánh sáng trắng thành nhiều màu","Khúc xạ ánh sáng"] },
+    { q: "Nhiễu xạ ánh sáng là hiện tượng?", a: "Ánh sáng đi vòng qua vật cản", opts: ["Khúc xạ","Giao thoa","Ánh sáng đi vòng qua vật cản","Tán sắc"] },
+    { q: "Bước sóng ánh sáng tím so với đỏ?", a: "Ngắn hơn", opts: ["Dài hơn","Ngắn hơn","Bằng nhau","Không xác định"] },
+    { q: "Nguồn sáng kết hợp là?", a: "Hai nguồn có cùng tần số và độ lệch pha không đổi", opts: ["Cùng pha","Khác pha","Hai nguồn có cùng tần số và độ lệch pha không đổi","Không kết hợp"] }
+  ],
+
+  // ===== CHƯƠNG 6 =====
+  6: [
+    { q: "Hiện tượng quang điện là gì?", a: "Electron bật ra khỏi kim loại khi bị chiếu sáng", opts: ["Kim loại phát sáng","Electron bật ra khi bị chiếu sáng","Phát xạ nhiệt","Tán xạ ánh sáng"] },
+    { q: "Năng lượng của photon được tính bằng?", a: "E = hf", opts: ["E = h/f","E = hf","E = hc","E = f/h"] },
+    { q: "Khi tăng tần số ánh sáng chiếu vào kim loại, động năng electron?", a: "Tăng", opts: ["Giảm","Không đổi","Tăng","Bằng 0"] },
+    { q: "Ánh sáng có tần số nhỏ hơn giới hạn quang điện thì?", a: "Không gây ra hiện tượng quang điện", opts: ["Không phát xạ","Không gây ra hiện tượng quang điện","Phát ra electron","Phát ra ánh sáng"] },
+    { q: "Thuyết lượng tử ánh sáng khẳng định ánh sáng có tính chất?", a: "Vừa sóng vừa hạt", opts: ["Sóng","Hạt","Vừa sóng vừa hạt","Không xác định"] }
+  ]
+};
+
+// ======================== CODE HIỂN THỊ ========================
+const chaptersDiv = document.getElementById("chapters");
+const lessonsDiv = document.getElementById("lessons");
+const lessonDetail = document.getElementById("lessonDetail");
+const contentDiv = document.getElementById("content");
+
+// Hiển thị danh sách chương
+data.forEach((ch, i) => {
+  const div = document.createElement("div");
+  div.className = "card";
+  div.textContent = ch.title;
+  div.onclick = () => openChapter(i + 1);
+  chaptersDiv.appendChild(div);
+});
+
+function openChapter(id) {
+  chaptersDiv.style.display = "none";
+  lessonsDiv.classList.add("active");
+  lessonsDiv.innerHTML = `<h2>${data[id-1].title}</h2>`;
+  data[id - 1].lessons.forEach((b, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.textContent = b;
+    card.onclick = () => openLesson(id, i + 1);
+    lessonsDiv.appendChild(card);
+  });
+  const back = document.createElement("div");
+  back.className = "back";
+  back.textContent = "← Quay lại danh sách chương";
+  back.onclick = () => {
+    lessonsDiv.classList.remove("active");
+    chaptersDiv.style.display = "block";
+  };
+  lessonsDiv.appendChild(back);
+}
+
+function openLesson(ch, b) {
+  lessonsDiv.classList.remove("active");
+  lessonDetail.classList.add("active");
+  const title = data[ch - 1].lessons[b - 1];
+  lessonDetail.innerHTML = `<h2>${title}</h2>
+  <button class="btn" onclick="showTheory(${ch},${b})">📘 Lý thuyết</button>
+  <button class="btn" onclick="showQuiz(${ch})">🧠 Bài tập trắc nghiệm</button>
+  <div class="back" onclick="backToLessons(${ch})">← Quay lại danh sách bài</div>`;
+}
+
+function showTheory(ch, b) {
+  lessonDetail.classList.remove("active");
+  contentDiv.classList.add("active");
+  contentDiv.innerHTML = `<h2>${data[ch-1].lessons[b-1]} - Lý thuyết</h2>
+  <input type="text" id="link" placeholder="Dán link YouTube hoặc tài liệu...">
+  <button class="btn" onclick="loadVideo()">Hiển thị</button>
+  <div id="videoArea"></div>
+  <div class="back" onclick="backToLesson(${ch},${b})">← Quay lại</div>`;
+}
+
+function loadVideo() {
+  const link = document.getElementById("link").value;
+  const videoArea = document.getElementById("videoArea");
+  if (link.includes("youtube")) {
+    const id = link.split("v=")[1];
+    videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;
+  } else {
+    videoArea.innerHTML = `<a href="${link}" target="_blank" style="color:var(--accent2)">Mở tài liệu tại đây</a>`;
+  }
+}
+
+function showQuiz(ch) {
+  lessonDetail.classList.remove("active");
+  contentDiv.classList.add("active");
+  let qList = quiz[ch] || [];
+  if (qList.length > 5) qList = qList.sort(() => Math.random() - 0.5).slice(0, 5);
+
+  let html = `<h2>Bài tập trắc nghiệm</h2>`;
+  qList.forEach((q, i) => {
+    html += `<div class="question" id="q${ch}_${i}">
+      <strong>${i + 1}. ${q.q}</strong><br>`;
+    q.opts.forEach(opt => {
+      html += `<div class="option" onclick="checkAnswer(${ch}, ${i}, '${opt}', this)">${opt}</div>`;
+    });
+    html += `<div class='result'></div></div>`;
+  });
+  html += `<div class="back" onclick="backToLesson(${ch},1)">← Quay lại</div>`;
+  contentDiv.innerHTML = html;
+}
+
+function checkAnswer(ch, i, opt, el) {
+  const parent = el.parentElement;
+  const question = parent.querySelector("strong").textContent.slice(3);
+  const q = quiz[ch].find(item => question.includes(item.q.slice(0, 10)));
+  const resultDiv = parent.querySelector(".result");
+  if (!resultDiv.textContent) {
+    if (opt === q.a) {
+      resultDiv.innerHTML = "<p style='color:lightgreen;'>✅ Đúng rồi!</p>";
+    } else {
+      resultDiv.innerHTML = `<p style='color:#ff6b6b;'>❌ Sai, đáp án đúng là: <b>${q.a}</b></p>`;
+    }
+  }
+}
+
+function backToLessons(ch) {
+  lessonDetail.classList.remove("active");
+  openChapter(ch);
+}
+
+function backToLesson(ch, b) {
+  contentDiv.classList.remove("active");
+  openLesson(ch, b);
+}
+</script>
+  
+<!-- Nút quay lại trang chính -->
+<div style="margin-top:30px;">
+  <button class="btn" onclick="window.location.href='index.html'">
+    ← Quay lại trang chính
+  </button>
+</div>
+</body>
+</html>

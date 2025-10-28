@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Snake Quiz — Rắn Săn Mồi (Neon)</title>
+<style>
+  :root{
+    --bg:#071023;
+    --panel: rgba(255,255,255,0.03);
+    --neon1: #7cf7ff;
+    --neon2: #5ee3a5;
+    --accent: #ffb86b; /* Màu vàng neon */
+    --glass: rgba(255,255,255,0.04);
+    --muted: rgba(230,238,248,0.65);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(30,50,90,0.24), transparent),
+                linear-gradient(135deg,#041526 0%, #071023 60%);
+    color:#eaf6ff;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  .wrap{max-width:1200px;margin:18px auto;padding:18px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(90deg,var(--neon1),var(--neon2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#062}
+  h1{margin:0;font-size:1.15rem}
+  p.lead{margin:0;color:var(--muted);font-size:0.9rem}
+
+  .controls{display:flex;gap:8px;align-items:center}
+  .btn{background:linear-gradient(90deg,var(--neon1),var(--accent));border:none;padding:9px 14px;border-radius:10px;font-weight:700;color:#012;cursor:pointer;box-shadow:0 8px 30px rgba(54,130,170,0.08)}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  select,input{background:var(--glass);border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:var(--muted)}
+
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:16px}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+  .boardWrap{display:flex;justify-content:center;align-items:center;padding:10px}
+  canvas#board{background:linear-gradient(180deg,#041022,#051425);border-radius:10px;box-shadow:0 16px 60px rgba(4,28,50,0.7);max-width:100%;height:auto}
+
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .tag{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.02);font-weight:600}
+  .small{color:var(--muted);font-size:0.9rem}
+
+  /* modal */
+  .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(180deg,rgba(2,6,12,0.45),rgba(2,6,12,0.65));backdrop-filter:blur(4px);z-index:40;opacity:0;pointer-events:none;transition:opacity .18s ease}
+  .modal.show{opacity:1;pointer-events:auto}
+  .qcard{width:100%;max-width:720px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 20px 60px rgba(2,6,23,0.7)}
+  .qhead{display:flex;justify-content:space-between;align-items:center}
+  .qtext{margin-top:12px;font-size:1.05rem}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .opt{padding:12px;border-radius:10px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.03);cursor:pointer;font-weight:600;transition:transform .12s ease,box-shadow .12s ease}
+  .opt:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(0,0,0,0.5)}
+  .opt.correct{outline:3px solid rgba(80,250,123,0.13);box-shadow:0 10px 30px rgba(80,250,123,0.03)}
+  .opt.wrong{outline:3px solid rgba(255,107,107,0.08);box-shadow:0 10px 30px rgba(255,107,107,0.02)}
+  .qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted)}
+
+  /* [BỔ SUNG] Đổi màu chữ câu hỏi và câu trả lời thành vàng */
+  .qtext, .opt {
+    color: var(--accent) !important;
+  }
+  /* end [BỔ SUNG] */
+
+  /* confetti canvas */
+  #confetti{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:50}
+
+  @media (max-width:980px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">11</div>
+      <div>
+        <h1>Snake Quiz — Rắn Săn Mồi Học Tập</h1>
+        <p class="lead">Neon xanh • Popup câu hỏi • Âm thanh hiệu ứng</p>
+      </div>
+    </div>
+    <div class="controls">
+      <select id="subject">
+        <option value="Lý">Lý</option>
+        <option value="Hóa">Hóa</option>
+        <option value="Toán">Toán</option>
+        <option value="Văn">Văn</option>
+      </select>
+      <select id="speed">
+        <option value="110">Chuẩn</option>
+        <option value="90">Nhanh</option>
+        <option value="70">Rất nhanh</option>
+      </select>
+      <button class="btn" id="btnStart">Bắt đầu</button>
+      <button class="btn ghost" id="btnPause">Tạm dừng</button>
+      <button class="btn ghost" id="btnReset">Đặt lại</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <div class="meta">
+          <div class="tag" id="tagSub">Môn: —</div>
+          <div class="small">Phím: ← ↑ → ↓ hoặc WASD</div>
+        </div>
+        <div class="boardWrap">
+          <canvas id="board" width="900" height="540"></canvas>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px">
+          <div class="small">Điểm: <strong id="score">0</strong></div>
+          <div class="small">Độ dài: <strong id="len">1</strong></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:12px;display:flex;gap:12px;align-items:center;justify-content:space-between">
+        <div>
+          <div class="small">Mạng:</div>
+          <div style="font-weight:700;font-size:1.2rem" id="lives">3</div>
+        </div>
+        <div>
+          <button class="btn ghost" id="btnSkip">Bỏ câu (mất 1 mạng)</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <h3 style="margin:0 0 8px 0">Lịch sử</h3>
+      <div id="history" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn" id="btnShare">Sao chép kết quả</button>
+        <button class="btn ghost" id="btnHelp">Hướng dẫn</button>
+      </div>
+      <p style="margin-top:12px;color:var(--muted)">Câu hỏi được xáo trộn mỗi lượt. Trả lời đúng: +10 điểm & rắn dài ra. Sai: mất 1 mạng và rút ngắn.</p>
+    </aside>
+  </div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="qcard">
+    <div class="qhead">
+      <div><strong id="qSub">--</strong></div>
+      <div class="small">Thời gian: <span id="qTime">20</span>s</div>
+    </div>
+    <div class="qtext" id="qText">Câu hỏi...</div>
+    <div class="opts" id="qOpts"></div>
+    <div class="qfoot">
+      <div class="small" id="qHint"></div>
+      <div><button class="btn ghost" id="qClose">Bỏ qua</button></div>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ===== WebAudio: simple SFX ===== */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = AudioCtx ? new AudioCtx() : null;
+function beep(freq=440,dur=0.06, gain=0.12, type='sine'){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(gain, audioCtx.currentTime);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + dur);
+}
+function chime(){ beep(880,0.08,0.12,'triangle'); setTimeout(()=>beep(1320,0.06,0.08,'sine'),60); }
+function buzz(){ beep(160,0.12,0.14,'square'); }
+
+/* ===== Questions bank (expandable) ===== */
+const QUESTION_BANK = {
+  "Lý":[
+    {q:'Đơn vị của công suất là?', a:['Watt','Joule','Newton','Pascal'], correct:0},
+    {q:'Gia tốc có đơn vị là?', a:['m/s²','m/s','m','s²'], correct:0},
+    {q:'Động lượng p = ?', a:['m v','m + v','m - v','v/m'], correct:0},
+    {q:'Hiện tượng khúc xạ xảy ra khi?', a:['Ánh sáng qua hai môi trường','Ánh sáng phản xạ','Bản thân ánh sáng tắt','Không liên quan'], correct:0}
+  ],
+  "Hóa":[
+    {q:'Công thức axit clohidric?', a:['HCl','H2SO4','NaCl','CO2'], correct:0},
+    {q:'pH < 7 nghĩa là dung dịch?', a:['Axit','Bazơ','Trung hòa','Muối'], correct:0},
+    {q:'Phản ứng phân hủy là?', a:['A → B + C','A + B → C','A + B → AB','Không phản ứng'], correct:0},
+    {q:'Ion OH- là?', a:['Gốc bazơ','Gốc axit','Cation','Không phải ion'], correct:0}
+  ],
+  "Toán":[
+    {q:'Đạo hàm của x^2 là?', a:['2x','x','x^2','0'], correct:0},
+    {q:'Tổng góc trong tam giác bằng?', a:['180°','360°','90°','270°'], correct:0},
+    {q:'Nghiệm phương trình ax+b=0 là?', a:['-b/a','b/a','0','a/b'], correct:0},
+    {q:'Hàm y = x^2 là đồ thị?', a:['Parabol','Đường thẳng','Elip','Hyperbola'], correct:0}
+  ],
+  "Văn":[
+    {q:'Tác giả Truyện Kiều?', a:['Nguyễn Du','Nam Cao','Vũ Trọng Phụng','Ngô Tất Tố'], correct:0},
+    {q:'Tác phẩm "Tắt đèn" của ai?', a:['Ngô Tất Tố','Nguyễn Huy Tưởng','Ngô Tất Tố','Nguyễn Du'], correct:0},
+    {q:'Thể loại truyền kỳ thường có yếu tố?', a:['Siêu nhiên','Thực nghiệm','Công nghệ','Kinh tế'], correct:0},
+    {q:'Biện pháp tu từ so sánh là?', a:['So sánh A với B','Liệt kê','Phủ định','Ngắt câu'], correct:0}
+  ]
+};
+
+/* ===== Canvas + game state ===== */
+const board = document.getElementById('board');
+const ctx = board.getContext('2d');
+const confCanvas = document.getElementById('confetti');
+const C = confCanvas.getContext('2d');
+
+let GRID = 18; // size pixel per cell (neon look)
+let COLS = Math.floor(board.width / GRID);
+let ROWS = Math.floor(board.height / GRID);
+
+const state = {
+  running:false,
+  dir:{x:1,y:0},
+  nextDir:{x:1,y:0},
+  snake:[],
+  food:null,
+  score:0,
+  lives:3,
+  speed:110,
+  subject:null,
+  qActive:false,
+  usedQ:{}, // track used indices per subject
+};
+
+/* init sizes */
+function resize() {
+  // keep canvas size fixed but recompute cols/rows if changed
+  COLS = Math.floor(board.width / GRID);
+  ROWS = Math.floor(board.height / GRID);
+  confCanvas.width = window.innerWidth;
+  confCanvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* utils */
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]] } return b; }
+
+/* drawing helpers: glow rect */
+function drawCell(x,y, size, color, glow=12){
+  ctx.save();
+  ctx.translate(x+size/2, y+size/2);
+  ctx.shadowBlur = glow;
+  ctx.shadowColor = color;
+  ctx.fillStyle = color;
+  ctx.fillRect(-size/2, -size/2, size, size);
+  ctx.restore();
+}
+
+/* reset */
+function resetGame(){
+  state.snake = [{x: Math.floor(COLS/2), y: Math.floor(ROWS/2)}];
+  state.dir = {x:1,y:0};
+  state.nextDir = {x:1,y:0};
+  state.food = null;
+  state.score = 0;
+  state.lives = 3;
+  state.qActive = false;
+  state.usedQ = {};
+  updateHUD();
+  spawnFood();
+  draw();
+}
+
+/* spawn food with associated question */
+function spawnFood(){
+  if(!state.subject) return;
+  let tries=0;
+  while(tries<500){
+    const fx = randInt(1,COLS-2), fy = randInt(1,ROWS-2);
+    if(!state.snake.some(s=>s.x===fx && s.y===fy)){
+      const q = pickQuestion(state.subject);
+      state.food = {x:fx,y:fy,q};
+      break;
+    }
+    tries++;
+  }
+}
+
+/* pick question, try avoid repeats */
+function pickQuestion(sub){
+  const pool = QUESTION_BANK[sub] || [];
+  if(!state.usedQ[sub]) state.usedQ[sub]=new Set();
+  const unused = pool.map((v,i)=>i).filter(i=>!state.usedQ[sub].has(i));
+  if(unused.length===0){ state.usedQ[sub]=new Set(); } // reset if exhausted
+  const idxList = pool.map((v,i)=>i).filter(i=>!state.usedQ[sub].has(i));
+  const idx = idxList.length ? idxList[Math.floor(Math.random()*idxList.length)] : Math.floor(Math.random()*pool.length);
+  state.usedQ[sub].add(idx);
+  return pool[idx];
+}
+
+/* draw world */
+function clearBoard(){
+  ctx.clearRect(0,0,board.width,board.height);
+  // subtle grid glow
+  for(let gx=0; gx<COLS; gx++){
+    for(let gy=0; gy<ROWS; gy++){
+      // optional faint dots for neon feel
+      if((gx+gy)%10===0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.006)';
+        ctx.fillRect(gx*GRID+GRID/2.6, gy*GRID+GRID/2.6, 1,1);
+      }
+    }
+  }
+}
+/* render snake with trailing glow */
+function draw(){
+  clearBoard();
+  // food
+  if(state.food){
+    const fx = state.food.x*GRID, fy = state.food.y*GRID;
+    drawCell(fx,fy, GRID*0.9, 'rgba(255,184,107,0.95)', 20);
+    // small inner symbol
+    ctx.save(); ctx.globalAlpha = 0.9;
+    ctx.fillStyle = '#041'; ctx.fillRect(fx+GRID*0.32, fy+GRID*0.32, GRID*0.36, GRID*0.36);
+    ctx.restore();
+  }
+  // snake: tail lighter, head brightest
+  for(let i=state.snake.length-1; i>=0; i--){
+    const s = state.snake[i];
+    const x=s.x*GRID, y=s.y*GRID;
+    const t = i===0 ? 26 : Math.max(6, 26 - i*2);
+    const color = i===0 ? 'rgba(124,247,255,1)' : `rgba(180,142,255,${Math.max(0.18, 1 - i/ (state.snake.length+4))})`;
+    drawCell(x,y, GRID*0.92, color, t);
+  }
+  // HUD glints
+  updateHUD();
+}
+
+/* movement tick */
+let loop = null;
+function startLoop(){
+  if(loop) clearInterval(loop);
+  loop = setInterval(tick, state.speed);
+  state.running = true;
+}
+function stopLoop(){
+  if(loop) clearInterval(loop);
+  loop = null;
+  state.running = false;
+}
+function tick(){
+  if(state.qActive) return; // paused while question active
+  const head = {...state.snake[0]};
+  state.dir = state.nextDir; // apply buffered turn
+  head.x += state.dir.x; head.y += state.dir.y;
+  // wrap
+  if(head.x < 0) head.x = COLS-1;
+  if(head.x >= COLS) head.x = 0;
+  if(head.y < 0) head.y = ROWS-1;
+  if(head.y >= ROWS) head.y = 0;
+  // self collision
+  if(state.snake.some(s=>s.x===head.x && s.y===head.y)){
+    // lose life and shrink
+    loseLife();
+    return;
+  }
+  state.snake.unshift(head);
+  // check food
+  if(state.food && head.x===state.food.x && head.y===state.food.y){
+    // pause and show question
+    state.qActive = true;
+    openQuestionModal(state.food.q, (ok)=>{
+      if(ok){
+        state.score += 10;
+        chime();
+        // keep extra length (do not pop)
+        spawnConfetti();
+      } else {
+        buzz();
+        state.lives = Math.max(0, state.lives-1);
+        // shrink a bit: remove 1 tail if possible
+        if(state.snake.length>1) state.snake.pop();
+        if(state.lives<=0){
+          stopLoop();
+          setTimeout(()=>{ alert('Hết mạng — trò chơi kết thúc! Điểm: '+state.score); },250);
+        }
+      }
+      updateHUD();
+      state.food = null;
+      state.qActive = false;
+      spawnFood();
+      draw();
+    });
+  } else {
+    // normal move
+    state.snake.pop();
+    draw();
+  }
+}
+
+/* controls */
+window.addEventListener('keydown',(e)=> {
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','a','d','w','s'].includes(e.key)){
+    if(e.key==='ArrowLeft' || e.key==='a'){ if(state.dir.x!==1) state.nextDir = {x:-1,y:0}; }
+    if(e.key==='ArrowRight' || e.key==='d'){ if(state.dir.x!==-1) state.nextDir = {x:1,y:0}; }
+    if(e.key==='ArrowUp' || e.key==='w'){ if(state.dir.y!==1) state.nextDir = {x:0,y:-1}; }
+    if(e.key==='ArrowDown' || e.key==='s'){ if(state.dir.y!==-1) state.nextDir = {x:0,y:1}; }
+  }
+});
+
+/* UI bindings */
+document.getElementById('btnStart').addEventListener('click', ()=>{
+  const sub = document.getElementById('subject').value;
+  state.subject = sub; document.getElementById('tagSub').textContent = 'Môn: '+sub;
+  resetGame();
+  state.speed = parseInt(document.getElementById('speed').value);
+  startLoop();
+});
+document.getElementById('btnPause').addEventListener('click', ()=>{
+  if(state.running){ stopLoop(); document.getElementById('btnPause').textContent='Tiếp tục'; }
+  else { startLoop(); document.getElementById('btnPause').textContent='Tạm dừng'; }
+});
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(confirm('Bạn có muốn đặt lại trò chơi?')){ stopLoop(); resetGame(); document.getElementById('history').innerHTML=''; document.getElementById('tagSub').textContent='Môn: —'; state.subject=null; }
+});
+document.getElementById('btnSkip').addEventListener('click', ()=>{
+  if(state.qActive){ alert('Đang có câu hỏi.'); return; }
+  if(state.food){ state.food = null; state.lives = Math.max(0,state.lives-1); spawnFood(); draw(); updateHUD(); }
+});
+document.getElementById('btnHelp').addEventListener('click', ()=> {
+  alert('Chọn môn → Bắt đầu. Khi rắn ăn mồi xuất hiện popup câu hỏi. Trả lời đúng: +10 điểm & rắn dài ra. Sai: mất 1 mạng. Dùng ←↑→↓ hoặc WASD.');
+});
+document.getElementById('btnShare').addEventListener('click', ()=> {
+  const text = `SnakeQuiz - Môn:${state.subject||'?'} Điểm:${state.score} Độ dài:${state.snake.length}`;
+  if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>alert('Đã sao chép kết quả!')); } else prompt('Sao chép:', text);
+});
+
+/* HUD */
+function updateHUD(){
+  document.getElementById('score').textContent = state.score;
+  document.getElementById('len').textContent = state.snake.length;
+  document.getElementById('lives').textContent = state.lives;
+}
+
+/* ===== Modal logic (center popup with timer) ===== */
+const modal = document.getElementById('modal');
+const qText = document.getElementById('qText');
+const qOpts = document.getElementById('qOpts');
+const qTime = document.getElementById('qTime');
+const qSub = document.getElementById('qSub');
+const qHint = document.getElementById('qHint');
+let qCountdown = null;
+
+function openQuestionModal(qobj, callback){
+  modal.classList.add('show');
+  qSub.textContent = state.subject;
+  qText.textContent = qobj.q;
+  qHint.textContent = '';
+  qOpts.innerHTML = '';
+  // shuffle options and map to original indices
+  const mapped = qobj.a.map((t,i)=>({t,i}));
+  const opts = shuffle(mapped);
+  opts.forEach(o=>{
+    const b = document.createElement('button');
+    b.className='opt';
+    b.textContent = o.t;
+    b.addEventListener('click', ()=> { // disable inputs
+      if(qCountdown) clearInterval(qCountdown);
+      // mark selection
+      Array.from(qOpts.children).forEach(c=>c.style.pointerEvents='none');
+      if(o.i === qobj.correct){
+        b.classList.add('correct');
+        setTimeout(()=>{ closeModal(); callback(true); },350);
+      } else {
+        b.classList.add('wrong');
+        // reveal correct
+        Array.from(qOpts.children).forEach(c=>{ if(c.textContent===qobj.a[qobj.correct]) c.classList.add('correct'); });
+        setTimeout(()=>{ closeModal(); callback(false); },700);
+      }
+    });
+    qOpts.appendChild(b);
+  });
+  // timer
+  let t = 20; qTime.textContent = t;
+  qCountdown = setInterval(()=>{
+    t--; qTime.textContent = t;
+    if(t<=0){
+      clearInterval(qCountdown);
+      qCountdown = null;
+      Array.from(qOpts.children).forEach(c=>{ if(c.textContent===qobj.a[qobj.correct]) c.classList.add('correct'); c.style.pointerEvents='none'; });
+      setTimeout(()=>{ closeModal(); callback(false); },900);
+    }
+  },1000);
+}
+
+/* close modal */
+function closeModal(){ modal.classList.remove('show'); if(qCountdown){ clearInterval(qCountdown); qCountdown=null; } }
+
+/* add to history */
+function addHistory(q, ok, correct){
+  const h = document.getElementById('history');
+  const row = document.createElement('div');
+  row.style.display='flex'; row.style.justifyContent='space-between'; row.style.padding='8px'; row.style.borderRadius='8px'; row.style.background='rgba(255,255,255,0.02)';
+  const left = document.createElement('div'); left.textContent = q.length>70? q.slice(0,67)+'...': q;
+  const right = document.createElement('div'); right.textContent = ok? '✓' : ('✗ ' + (correct||''));
+  row.appendChild(left); row.appendChild(right);
+  h.prepend(row);
+  while(h.children.length>30) h.removeChild(h.lastChild);
+}
+
+/* confetti system */
+let confetti = [];
+function spawnConfetti(){
+  for(let i=0;i<60;i++){
+    confetti.push({x: Math.random()*confCanvas.width, y: -10 - Math.random()*200, vx: Math.random()*6-3, vy: Math.random()*3+2, r: Math.random()*6+3, c: ['#7cf7ff','#ffb86b','#b48eff','#5ee3a5'][Math.floor(Math.random()*4)], life: Math.random()*80+50});
+  }
+  if(!confAnim) runConf();
+}
+let confAnim=false;
+function runConf(){
+  confAnim=true; requestAnimationFrame(loopConf);
+}
+function loopConf(){
+  C.clearRect(0,0,confCanvas.width, confCanvas.height);
+  for(let i=confetti.length-1;i>=0;i--){
+    const p = confetti[i];
+    p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life--;
+    C.fillStyle = p.c; C.beginPath(); C.ellipse(p.x,p.y,p.r,p.r*0.7,0,0,Math.PI*2); C.fill();
+    if(p.life<=0 || p.y>confCanvas.height+50) confetti.splice(i,1);
+  }
+  if(confetti.length>0) requestAnimationFrame(loopConf); else confAnim=false;
+}
+
+/* when answer returned from modal callback */
+function openQuestionModalAndHandle(qobj){
+  openQuestionModal(qobj, (ok)=>{
+    if(ok){
+      addHistory(qobj.q, true);
+    } else {
+      addHistory(qobj.q, false, qobj.a[qobj.correct]);
+    }
+  });
+}
+
+/* pickQuestion wrapper used earlier returns qobj; but openQuestionModal already handles callback
+   However in tick() we used openQuestionModal(state.food.q, cb) — we also need to add history there.
+   Modify that callback to call addHistory accordingly (done above in tick). */
+
+ /* lose life helper */
+function loseLife(){
+  state.lives = Math.max(0, state.lives-1);
+  updateHUD();
+  // shrink snake by 1 segment if possible
+  if(state.snake.length>1) state.snake.pop();
+  if(state.lives<=0){
+    stopLoop();
+    setTimeout(()=>{ alert('Hết mạng! Điểm: '+state.score); }, 200);
+  }
+}
+
+/* initial */
+resetGame();
+draw();
+
+/* ensure audio context resume on user interaction (browsers block autoplay) */
+document.addEventListener('click', ()=>{ if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }, {once:true});
+</script>
+<div style="text-align:center;margin:20px 0;">
+  <button class="btn" onclick="window.location.href='index.html'">← Quay lại trang chính</button>
+</div>
+<div style="text-align:center;margin:30px 0;">
+  <button class="back-btn" onclick="window.location.href='index.html#relax'">
+    ← Quay lại Góc thư giãn
+  </button>
+</div>
+
+
+</body>
+</html>
+
+
+
+
+
+

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📘 Ngữ văn 11</title>
+<style>
+  :root {
+    --bg: #0e1726;
+    --card: #1a1622;
+    --accent1: #f39c12;
+    --accent2: #9b59b6;
+    --text: #e6eef8;
+    --muted: #94a3b8;
+  }
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    text-align: center;
+  }
+  h1 { color: var(--accent2); }
+  .chapter, .lesson, .content { display: none; }
+  .active { display: block; }
+  .card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 12px;
+    margin: 10px auto;
+    max-width: 500px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .card:hover { transform: scale(1.03); border: 1px solid var(--accent1); }
+  .btn {
+    background: var(--accent1);
+    color: var(--bg);
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+  }
+  iframe {
+    width: 100%; height: 360px; border: none; border-radius: 8px; margin-top: 10px;
+  }
+  .question {
+    background: var(--card);
+    margin: 10px auto;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 600px;
+    text-align: left;
+  }
+  .option label{ cursor:pointer; }
+  .option input{ margin-right:8px; }
+  .option {
+    display: block;
+    background: #241827;
+    margin: 6px 0;
+    padding: 8px;
+    border-radius: 8px;
+    transition: 0.2s;
+  }
+  .option:hover { background: var(--accent2); color: var(--bg); }
+  .back {
+    display: block;
+    margin: 20px auto;
+    color: var(--accent2);
+    cursor: pointer;
+  }
+  input[type=text]{
+    width:90%; padding:8px; border-radius:6px; border:1px solid #332437; background:#0b0610; color:var(--text);
+  }
+  .result {
+    margin: 20px auto;
+    color: var(--accent1);
+  }
+  .answer{ margin-top:8px; color:var(--accent1); }
+</style>
+</head>
+<body>
+
+<h1>📘 Ngữ văn 11</h1>
+<p>Chọn chương để bắt đầu học</p>
+
+<div id="chapters"></div>
+<div id="lessons" class="chapter"></div>
+<div id="lessonDetail" class="lesson"></div>
+<div id="content" class="content"></div>
+
+<script>
+// ------------------ Âm thanh WebAudio ------------------
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playClick(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.value = 400;
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.1);
+}
+
+// ------------------ Dữ liệu ------------------
+const data = [
+  { title: "Bài 1: Thơ và truyện thơ", lessons: ["Sóng (Xuân Quỳnh)", "Lời tiễn dặn (Trích)", "Thực hành đọc hiểu và biểu đạt"] },
+  { title: "Bài 2: Thơ Nguyễn Du", lessons: ["Nguyễn Du - Cuộc đời và sự nghiệp", "Trao duyên (Trích Truyện Kiều)", "Tiểu Thanh kí"] },
+  { title: "Bài 3: Truyện", lessons: ["Chí Phèo (Nam Cao)", "Chữ người tử tù (Nguyễn Tuân)", "Thực hành đọc hiểu truyện"] },
+  { title: "Bài 4: Văn bản thông tin", lessons: ["Phải coi luật pháp như khi trời để thở", "Tạ Quang Bửu - người thầy thông thái", "Thực hành đọc hiểu VB thông tin"] },
+  { title: "Bài 5: Truyện ngắn", lessons: ["Trái tim Đan-kô", "Một người Hà Nội", "Tầng hai (Phong Điệp)"] }
+];
+
+// ------------------ Câu hỏi mẫu ------------------
+const quiz = {};
+function makeFive(lesson){
+  return [
+    { q: `Câu 1: Nội dung chính của "${lesson}" là gì?`, a: "Đọc hiểu và phân tích nội dung, nghệ thuật", opts: ["Đọc hiểu và phân tích nội dung, nghệ thuật", "Thực hành thí nghiệm", "Tính toán số liệu", "Không liên quan"] },
+    { q: `Câu 2: Khi học bài "${lesson}" cần chú ý điều gì?`, a: "Ngôn ngữ, nghệ thuật, bối cảnh", opts: ["Ngôn ngữ, nghệ thuật, bối cảnh", "Thời tiết", "Công thức hóa học", "Bản đồ địa lý"] },
+    { q: `Câu 3: Khi viết đoạn văn cảm nhận cần:`, a: "Luận điểm rõ, dẫn chứng, liên hệ", opts: ["Luận điểm rõ, dẫn chứng, liên hệ", "Viết ngẫu hứng", "Chỉ chép nguyên văn", "Không cần dẫn chứng"] },
+    { q: `Câu 4: Kĩ năng cần thiết khi học bài này là:`, a: "Đọc hiểu, phân tích, diễn đạt", opts: ["Đọc hiểu, phân tích, diễn đạt", "Thực hành hóa thí", "Tính toán số liệu", "Lập trình"] },
+    { q: `Câu 5: Bài này giúp rèn luyện điều gì?`, a: "Tư duy cảm thụ văn học và diễn đạt", opts: ["Tư duy cảm thụ văn học và diễn đạt", "Ghi nhớ máy móc", "Làm thí nghiệm", "Quan sát thiên nhiên"] }
+  ];
+}
+for(let ci=0; ci<data.length; ci++){
+  quiz[ci+1] = {};
+  for(let li=0; li<data[ci].lessons.length; li++){
+    quiz[ci+1][li+1] = makeFive(data[ci].lessons[li]);
+  }
+}
+
+// ------------------ Giao diện ------------------
+const chaptersDiv = document.getElementById("chapters");
+const lessonsDiv = document.getElementById("lessons");
+const lessonDetail = document.getElementById("lessonDetail");
+const contentDiv = document.getElementById("content");
+let lastOpened = { ch: null, lesson: null };
+
+data.forEach((ch,i)=>{
+  const div=document.createElement("div");
+  div.className="card";
+  div.textContent=ch.title;
+  div.onclick=()=>{playClick();openChapter(i+1)};
+  chaptersDiv.appendChild(div);
+});
+
+function openChapter(id){
+  playClick();
+  chaptersDiv.style.display="none";
+  lessonsDiv.classList.add("active");
+  lessonsDiv.innerHTML=`<h2>${data[id-1].title}</h2>`;
+  data[id-1].lessons.forEach((b,i)=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.textContent=b;
+    card.onclick=()=>{playClick();openLesson(id,i+1)};
+    lessonsDiv.appendChild(card);
+  });
+  const back=document.createElement("div");
+  back.className="back";
+  back.textContent="← Quay lại danh sách chương";
+  back.onclick=()=>{playClick();lessonsDiv.classList.remove("active");chaptersDiv.style.display="block";};
+  lessonsDiv.appendChild(back);
+}
+
+function openLesson(ch,b){
+  playClick();
+  lastOpened={ch:ch,lesson:b};
+  lessonsDiv.classList.remove("active");
+  lessonDetail.classList.add("active");
+  const title=data[ch-1].lessons[b-1];
+  lessonDetail.innerHTML=`
+    <h2>${title}</h2>
+    <button class="btn" onclick="playClick();showTheory(${ch},${b})">📖 Lý thuyết</button>
+    <button class="btn" onclick="playClick();showQuiz(${ch})">📝 Bài tập trắc nghiệm</button>
+    <button class="btn" onclick="playClick();showStorage(${ch},${b})">💾 Lưu trữ tài liệu</button>
+    <div class="back" onclick="playClick();backToLessons(${ch})">← Quay lại danh sách bài</div>`;
+}
+
+// ------------------ Lý thuyết ------------------
+function showTheory(ch,b){
+  lessonDetail.classList.remove("active");
+  contentDiv.classList.add("active");
+  contentDiv.innerHTML=`
+    <h2>${data[ch-1].lessons[b-1]} - Lý thuyết</h2>
+    <input type="text" id="link" placeholder="Dán link YouTube hoặc trang web...">
+    <button class="btn" onclick="playClick();loadVideo()">Hiển thị</button>
+    <div id="videoArea"></div>
+    <div class="back" onclick="playClick();backToLesson(${ch},${b})">← Quay lại</div>`;
+}
+
+function loadVideo(){
+  const link=document.getElementById("link").value;
+  const videoArea=document.getElementById("videoArea");
+  if(link.includes("youtube")||link.includes("youtu.be")){
+    let id='';
+    if(link.includes('v=')) id=link.split('v=')[1].split('&')[0];
+    else if(link.includes('youtu.be/')) id=link.split('youtu.be/')[1].split('?')[0];
+    videoArea.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;
+  } else {
+    if(!link) videoArea.innerHTML='<p style="color:var(--muted)">Chưa có link.</p>';
+    else videoArea.innerHTML=`<a href="${link}" target="_blank" style="color:var(--accent2)">Mở tài liệu tại đây</a>`;
+  }
+}
+
+// ------------------ Bài tập ------------------
+function showQuiz(ch){
+  lessonDetail.classList.remove("active");
+  contentDiv.classList.add("active");
+  const lessonIndex=lastOpened.lesson;
+  const qList=(quiz[ch]&&quiz[ch][lessonIndex])||[];
+  if(qList.length===0){
+    contentDiv.innerHTML=`<h2>Bài tập trắc nghiệm</h2><p style='color:var(--muted)'>Chưa có câu hỏi.</p><div class='back' onclick='backToLesson(${ch},${lessonIndex})'>← Quay lại</div>`;
+    return;
+  }
+  let html=`<h2>Bài tập trắc nghiệm: ${data[ch-1].lessons[lessonIndex-1]}</h2>`;
+  qList.forEach((q,i)=>{
+    html+=`<div class='question' id='q${i}'><strong>${i+1}. ${q.q}</strong><br>`;
+    q.opts.forEach(opt=>{
+      html+=`<div class="option"><label><input type='radio' name='q${i}' value='${opt}'> ${opt}</label></div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`<button class='btn' onclick='playClick();submitQuiz(${ch},${lessonIndex})'>Kiểm tra kết quả</button><div id='result' class='result'></div><div class='back' onclick='playClick();backToLesson(${ch},${lessonIndex})'>← Quay lại</div>`;
+  contentDiv.innerHTML=html;
+}
+
+function submitQuiz(ch,lessonIndex){
+  const qList=quiz[ch][lessonIndex];
+  let correct=0;
+  qList.forEach((q,i)=>{
+    const selected=document.querySelector(`input[name='q${i}']:checked`);
+    const questionDiv=document.getElementById(`q${i}`);
+    const oldAns=questionDiv.querySelector('.answer');
+    if(oldAns) oldAns.remove();
+    if(selected&&selected.value===q.a) correct++;
+    else {
+      const ans=document.createElement('div');
+      ans.className='answer';
+      ans.textContent=`Đáp án đúng: ${q.a}`;
+      questionDiv.appendChild(ans);
+    }
+  });
+  const total=qList.length;
+  const resultDiv=document.getElementById('result');
+  resultDiv.textContent=`Kết quả: ${correct}/${total} câu đúng`;
+  const retry=document.createElement('button');
+  retry.className='btn';
+  retry.textContent='Làm lại';
+  retry.onclick=()=>{playClick();showQuiz(ch)};
+  resultDiv.appendChild(document.createElement('br'));
+  resultDiv.appendChild(retry);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ------------------ Lưu trữ ------------------
+function showStorage(ch,b){
+  lessonDetail.classList.remove("active");
+  contentDiv.classList.add("active");
+  const key=`van11_storage_${ch}_${b}`;
+  let files=JSON.parse(localStorage.getItem(key)||"[]");
+  contentDiv.innerHTML=`
+    <h2>💾 Lưu trữ tài liệu - ${data[ch-1].lessons[b-1]}</h2>
+    <input type="file" id="storeInput" multiple>
+    <button class="btn" id="clearAllBtn">🗑 Xóa tất cả</button>
+    <div id="fileList"></div>
+    <div class="back" onclick="playClick();backToLesson(${ch},${b})">← Quay lại</div>`;
+  const fileList=document.getElementById("fileList");
+  function renderList(){
+    fileList.innerHTML="";
+    if(!files.length){
+      fileList.innerHTML="<p style='color:var(--muted)'>Chưa có tài liệu nào.</p>";
+      return;
+    }
+    files.forEach((f,i)=>{
+      const div=document.createElement("div");
+      div.className="question";
+      div.innerHTML=`<strong>${f.name}</strong> (${Math.round(f.size/1024)} KB)
+      <div style='margin-top:8px'>
+        <button class='btn' onclick="window.open('${f.url}')">Xem</button>
+        <button class='btn' onclick='deleteFile(${i})'>Xóa</button>
+      </div>`;
+      fileList.appendChild(div);
+    });
+  }
+  window.deleteFile=(i)=>{files.splice(i,1);localStorage.setItem(key,JSON.stringify(files));renderList();};
+  document.getElementById("storeInput").addEventListener("change",(e)=>{
+    const arr=[...e.target.files];
+    arr.forEach(f=>{
+      const url=URL.createObjectURL(f);
+      files.push({name:f.name,size:f.size,url});
+    });
+    localStorage.setItem(key,JSON.stringify(files));
+    renderList();
+  });
+  document.getElementById("clearAllBtn").addEventListener("click",()=>{
+    if(confirm("Xóa toàn bộ tài liệu?")){
+      localStorage.removeItem(key);
+      files=[];
+      renderList();
+    }
+  });
+  renderList();
+}
+
+// ------------------ Điều hướng ------------------
+function backToLessons(ch){playClick();lessonDetail.classList.remove("active");openChapter(ch);}
+function backToLesson(ch,b){playClick();contentDiv.classList.remove("active");openLesson(ch,b);}
+</script>
+<!-- Nút quay lại trang chính -->
+<div style="margin-top:30px;">
+  <button class="btn" onclick="window.location.href='index.html'">
+    ← Quay lại trang chính
+ </button>
+</body>
+</html>
+

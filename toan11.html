@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toán 11 - Kết Nối Tri Thức</title>
+<style>
+  :root {
+    --bg: #0e1726;
+    --card: #1a2333;
+    --accent1: #ff9f43;
+    --accent2: #00b4d8;
+    --text: #e6eef8;
+    --muted: #94a3b8;
+  }
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    text-align: center;
+  }
+  h1 { color: var(--accent2); }
+  .chapter, .lesson, .content { display: none; }
+  .active { display: block; }
+  .card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 12px;
+    margin: 10px auto;
+    max-width: 500px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .card:hover { transform: scale(1.03); border: 1px solid var(--accent1); }
+  .btn {
+    background: var(--accent1);
+    color: var(--bg);
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  iframe {
+    width: 100%; height: 360px; border: none; border-radius: 8px; margin-top: 10px;
+  }
+  .question {
+    background: var(--card);
+    margin: 10px auto;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 600px;
+    text-align: left;
+  }
+  .option {
+    display: block;
+    background: #122033;
+    margin: 6px 0;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .option:hover { background: var(--accent2); color: var(--bg); }
+  .back {
+    display: block;
+    margin: 20px auto;
+    color: var(--accent2);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>📘 Toán 11 - Kết Nối Tri Thức</h1>
+<p>Chọn chương để bắt đầu học</p>
+
+<div id="chapters"></div>
+<div id="lessons" class="chapter"></div>
+<div id="lessonDetail" class="lesson"></div>
+<div id="content" class="content"></div>
+<script>
+  // ======================== DỮ LIỆU CHƯƠNG ========================
+  const data = [
+    { title: "Chương 1: Hàm số lượng giác và phương trình lượng giác",
+      lessons: ["Bài 1: Giá trị lượng giác của góc lượng giác","Bài 2: Công thức lượng giác","Bài 3: Hàm số lượng giác","Bài 4: Phương trình lượng giác cơ bản"]
+    },
+    { title: "Chương 2: Dãy số. Cấp số cộng và cấp số nhân",
+      lessons: ["Bài 5: Dãy số","Bài 6: Cấp số cộng","Bài 7: Cấp số nhân"]
+    },
+    { title: "Chương 3: Các số đặc trưng đo xu thế trung tâm của mẫu số liệu ghép nhóm",
+      lessons: ["Bài 8: Mẫu số liệu ghép nhóm","Bài 9: Các số đặc trưng đo xu thế trung tâm"]
+    },
+    { title: "Chương 4: Quan hệ song song trong không gian",
+      lessons: ["Bài 10: Đường thẳng và mặt phẳng trong không gian","Bài 11: Hai đường thẳng song song","Bài 12: Đường thẳng và mặt phẳng song song","Bài 13: Hai mặt phẳng song song","Bài 14: Phép chiếu song song"]
+    },
+    { title: "Chương 5: Giới hạn. Hàm số liên tục",
+      lessons: ["Bài 15: Giới hạn của dãy số","Bài 16: Giới hạn của hàm số","Bài 17: Hàm số liên tục"]
+    },
+    { title: "Chương 6: Hàm số mũ và hàm số Lôgarit",
+      lessons: ["Bài 18: Lũy thừa với số mũ thực","Bài 19: Lôgarit","Bài 20: Hàm số mũ và hàm số lôgarit","Bài 21: Phương trình, bất phương trình mũ và lôgarit"]
+    },
+    { title: "Chương 7: Quan hệ vuông góc trong không gian",
+      lessons: ["Bài 22: Hai đường thẳng vuông góc","Bài 23: Đường thẳng vuông góc với mặt phẳng","Bài 24: Phép chiếu vuông góc","Bài 25: Hai mặt phẳng vuông góc","Bài 26: Khoảng cách","Bài 27: Thể tích"]
+    },
+    { title: "Chương 8: Các quy tắc tính xác suất",
+      lessons: ["Bài 28: Biến cố hợp, biến cố giao, biến cố độc lập","Bài 29: Công thức cộng xác suất","Bài 30: Công thức nhân xác suất"]
+    },
+    { title: "Chương 9: Đạo hàm",
+      lessons: ["Bài 31: Định nghĩa và ý nghĩa đạo hàm","Bài 32: Các quy tắc tính đạo hàm","Bài 33: Đạo hàm cấp hai"]
+    }
+  ];
+  
+  // ======================== NGÂN HÀNG CÂU HỎI ========================
+  const quiz = {
+    // --- CHƯƠNG 1: HÀM SỐ LƯỢNG GIÁC ---
+    1: [
+      { q: "Giá trị của sin(0°) là?", a: "0", opts: ["0", "1", "-1", "Không xác định"] },
+      { q: "cos(90°) bằng?", a: "0", opts: ["0", "1", "-1", "√3/2"] },
+      { q: "sin(30°) = ?", a: "1/2", opts: ["1", "1/2", "√3/2", "0"] },
+      { q: "tan(45°) = ?", a: "1", opts: ["1", "0", "√3", "1/√3"] },
+      { q: "sin²x + cos²x = ?", a: "1", opts: ["0", "1", "2", "cosx"] },
+      { q: "Công thức cộng: sin(a + b) = ?", a: "sin a cos b + cos a sin b", opts: ["sin a cos b + cos a sin b","sin a sin b + cos a cos b","cos a cos b - sin a sin b","cos a sin b - sin a cos b"] },
+      { q: "Công thức nhân đôi: sin(2x) = ?", a: "2sinxcosx", opts: ["sin²x","2sinxcosx","cos²x","tanx + cotx"] },
+      { q: "Chu kỳ của hàm sin(x) là?", a: "2π", opts: ["π", "2π", "4π", "π/2"] },
+      { q: "Hàm cos(x) nhận trục nào làm trục đối xứng?", a: "Oy", opts: ["Oy","Ox","x=π/2","x=0"] },
+      { q: "Giá trị lớn nhất của sin(x) là?", a: "1", opts: ["0","1","-1","2"] },
+      { q: "tan(x) = sin(x)/?", a: "cos(x)", opts: ["cos(x)","sin(x)","cot(x)","tan(x)"] },
+      { q: "cot(x) = ?", a: "1/tan(x)", opts: ["tan(x)","1/tan(x)","cos(x)","sin(x)"] },
+      { q: "Đồ thị y = sinx cắt trục hoành tại?", a: "x = kπ", opts: ["x = kπ","x = π/2 + kπ","x = 0","x = π"] },
+      { q: "cos(π) = ?", a: "-1", opts: ["1","0","-1","Không xác định"] },
+      { q: "sin(π/2) = ?", a: "1", opts: ["1","0","-1","√3/2"] },
+      { q: "tan(0) = ?", a: "0", opts: ["0","1","Không xác định","∞"] },
+      { q: "sin(-x) = ?", a: "-sinx", opts: ["sinx","-sinx","cosx","-cosx"] },
+      { q: "cos(-x) = ?", a: "cosx", opts: ["-cosx","cosx","sinx","-sinx"] },
+      { q: "tan(x+π) = ?", a: "tanx", opts: ["tanx","-tanx","cotx","-cotx"] },
+      { q: "Phương trình lượng giác cơ bản sinx=0 có nghiệm?", a: "x = kπ", opts: ["x = kπ","x = π/2 + kπ","x = 2kπ","x = π/4 + kπ"] }
+    ],
+  
+    // --- CHƯƠNG 2: DÃY SỐ, CẤP SỐ CỘNG, CẤP SỐ NHÂN ---
+    2: [
+      { q: "Công thức tổng quát dãy số: un = ?", a: "biểu thức theo n", opts: ["giá trị bất kỳ","biểu thức theo n","số đầu","số cuối"] },
+      { q: "Cấp số cộng có công sai d = ?", a: "u₂ - u₁", opts: ["u₂ - u₁","u₁ + u₂","u₁/u₂","u₁·u₂"] },
+      { q: "Số hạng tổng quát cấp số cộng: un = ?", a: "u₁ + (n-1)d", opts: ["u₁n","u₁ + (n-1)d","d(n-1)","n+d"] },
+      { q: "Tổng n số đầu cấp số cộng: Sn = ?", a: "n(u₁+un)/2", opts: ["n(u₁+un)/2","u₁·n","u₁+un","n²"] },
+      { q: "Cấp số nhân có công bội q = ?", a: "u₂/u₁", opts: ["u₂/u₁","u₁·u₂","u₂ - u₁","1/q"] },
+      { q: "Số hạng tổng quát cấp số nhân: un = ?", a: "u₁·q^(n-1)", opts: ["u₁+q(n-1)","u₁·q^(n-1)","u₁/q^(n-1)","u₁q"] },
+      { q: "Tổng n số đầu cấp số nhân: Sn = ?", a: "u₁(q^n - 1)/(q - 1)", opts: ["u₁(q^n - 1)/(q - 1)","u₁(q-1)/(q^n - 1)","n·u₁","q^n - 1"] },
+      { q: "Nếu d < 0 thì cấp số cộng?", a: "giảm dần", opts: ["tăng dần","giảm dần","không đổi","dao động"] },
+      { q: "Nếu q > 1 thì cấp số nhân?", a: "tăng dần", opts: ["tăng dần","giảm dần","bất biến","nghịch đảo"] },
+      { q: "Nếu |q| < 1 thì cấp số nhân?", a: "giảm dần", opts: ["giảm dần","tăng dần","nghịch đảo","không đổi"] },
+      { q: "Cấp số cộng có số hạng giữa bằng trung bình cộng của hai số đầu và cuối?", a: "Đúng", opts: ["Đúng","Sai"] },
+      { q: "Cấp số nhân có số hạng giữa bằng trung bình nhân hai số đầu và cuối?", a: "Đúng", opts: ["Đúng","Sai"] },
+      { q: "Nếu hai dãy có cùng công sai d thì?", a: "song song nhau trên đồ thị", opts: ["trùng nhau","song song nhau trên đồ thị","vuông góc","không liên quan"] },
+      { q: "Công bội q của dãy nhân có thể âm?", a: "Có", opts: ["Có","Không"] },
+      { q: "Công thức truy hồi cấp số cộng?", a: "uₙ₊₁ = uₙ + d", opts: ["uₙ₊₁ = uₙ + d","uₙ = uₙ₊₁ + d","u₁ = uₙ + d","uₙ = u₁·d"] },
+      { q: "Công thức truy hồi cấp số nhân?", a: "uₙ₊₁ = q·uₙ", opts: ["uₙ₊₁ = q·uₙ","uₙ = uₙ₊₁/q","u₁ = q·uₙ","q = uₙ + uₙ₊₁"] },
+      { q: "Tổng vô hạn cấp số nhân (|q|<1): S = ?", a: "u₁/(1-q)", opts: ["u₁/(1-q)","u₁(1-q)","u₁/q","1/q"] },
+      { q: "Cấp số cộng có thể biểu diễn bằng hàm bậc?", a: "bậc nhất", opts: ["bậc nhất","bậc hai","bậc ba","hàm mũ"] },
+      { q: "Cấp số nhân có thể biểu diễn bằng hàm?", a: "mũ", opts: ["mũ","bậc nhất","bậc hai","hằng"] },
+      { q: "Nếu u₁=2, q=2 thì u₄=?", a: "16", opts: ["4","8","16","32"] }
+    ],
+  
+    // --- CHƯƠNG 3: THỐNG KÊ ---
+    3: [
+      { q: "Số trung bình cộng là?", a: "Tổng các giá trị chia số phần tử", opts: ["Hiệu chia tổng","Tổng chia số phần tử","Hiệu nhân số phần tử","Tổng nhân 2"] },
+      { q: "Mốt (mode) là?", a: "Giá trị xuất hiện nhiều nhất", opts: ["Giá trị nhỏ nhất","Giá trị xuất hiện nhiều nhất","Giá trị lớn nhất","Giá trị trung bình"] },
+      { q: "Trung vị (median) là?", a: "Giá trị đứng giữa khi sắp xếp", opts: ["Giá trị nhỏ nhất","Giá trị lớn nhất","Giá trị đứng giữa khi sắp xếp","Giá trị đầu tiên"] },
+      { q: "Nếu dãy số có 10 phần tử thì trung vị là?", a: "Trung bình của phần tử thứ 5 và 6", opts: ["Phần tử thứ 5","Phần tử thứ 6","Trung bình của phần tử 5 và 6","Phần tử đầu tiên"] },
+      { q: "Phương sai đo điều gì?", a: "Mức độ phân tán", opts: ["Mức độ phân tán","Giá trị trung bình","Tần suất","Tổng số phần tử"] },
+      { q: "Độ lệch chuẩn là?", a: "Căn bậc hai của phương sai", opts: ["Căn bậc hai của phương sai","Bình phương phương sai","Tổng bình phương","Không liên quan"] },
+      { q: "Nếu tất cả các phần tử bằng nhau thì phương sai bằng?", a: "0", opts: ["0","1","Không xác định","Số phần tử"] },
+      { q: "Khi thêm cùng một hằng số vào các giá trị, phương sai?", a: "Không đổi", opts: ["Không đổi","Tăng gấp đôi","Giảm nửa","Bằng 0"] },
+      { q: "Khi nhân các giá trị với k, phương sai?", a: "Nhân với k²", opts: ["Nhân k²","Nhân k","Không đổi","Chia k²"] },
+      { q: "Trung bình cộng kí hiệu là?", a: "x̄", opts: ["x̄","μ","σ","n"] },
+      { q: "Phương sai kí hiệu là?", a: "s²", opts: ["s²","σ²","x̄","Σx"] },
+      { q: "Độ lệch chuẩn kí hiệu là?", a: "s", opts: ["s","σ","n","x̄"] },
+      { q: "Nếu một mẫu có giá trị cao hơn trung bình thì gọi là?", a: "Giá trị dương lệch", opts: ["Giá trị dương lệch","Giá trị âm lệch","Giá trị ngoại lai","Không biết"] },
+      { q: "Tổng tần số của bảng tần số bằng?", a: "Số phần tử", opts: ["Số phần tử","Số mốt","Giá trị lớn nhất","Tổng các giá trị"] },
+      { q: "Trong biểu đồ cột, trục tung biểu diễn?", a: "Tần số", opts: ["Tần số","Giá trị","Trung bình","Số phần tử"] },
+      { q: "Dạng phân bố cân đối có trung bình, mốt, trung vị?", a: "Xấp xỉ bằng nhau", opts: ["Bằng nhau","Xấp xỉ bằng nhau","Khác xa","Không xác định"] },
+      { q: "Nếu mốt < trung vị < trung bình thì phân bố?", a: "Lệch phải", opts: ["Lệch trái","Lệch phải","Đều","Chuẩn"] },
+      { q: "Nếu trung bình < trung vị < mốt thì phân bố?", a: "Lệch trái", opts: ["Lệch trái","Lệch phải","Chuẩn","Không xác định"] },
+      { q: "Dữ liệu ghép nhóm nghĩa là?", a: "Các giá trị chia thành khoảng", opts: ["Giá trị đơn lẻ","Các giá trị chia thành khoảng","Các giá trị rời rạc","Không xác định"] },
+      { q: "Biểu đồ hộp (boxplot) thể hiện?", a: "Phân bố và giá trị ngoại lai", opts: ["Phân bố và giá trị ngoại lai","Trung bình","Mốt","Phương sai"] }
+    ],
+  
+    // --- CÁC CHƯƠNG SAU GIỮ 5 CÂU ---
+    4: [
+      { q: "Hai đường thẳng song song khi nào?", a: "Không có điểm chung và cùng phương", opts: ["Cắt nhau", "Vuông góc", "Không có điểm chung và cùng phương", "Cùng mặt phẳng"] },
+      { q: "Nếu hai mặt phẳng song song thì mọi đường thẳng nằm trong chúng?", a: "Song song hoặc trùng nhau", opts: ["Vuông góc","Song song hoặc trùng nhau","Cắt nhau","Không liên quan"] },
+      { q: "Phép chiếu song song bảo toàn?", a: "Tỷ số đoạn thẳng", opts: ["Tỷ số đoạn thẳng","Độ dài","Diện tích","Thể tích"] },
+      { q: "Hai đường thẳng không đồng phẳng gọi là?", a: "Chéo nhau", opts: ["Chéo nhau","Song song","Vuông góc","Trùng nhau"] },
+      { q: "Một mặt phẳng song song với đường thẳng khi?", a: "Không có điểm chung", opts: ["Không có điểm chung","Cắt nhau","Trùng nhau","Vuông góc"] }
+    ],
+    5: [
+      { q: "Giới hạn lim f(x)=L nghĩa là?", a: "f(x) tiến gần L khi x→a", opts: ["f(x)=L", "f(a)=L", "f(x) tiến gần L khi x→a", "Không có nghĩa"] },
+      { q: "Hàm số liên tục tại điểm a khi?", a: "lim f(x)=f(a)", opts: ["lim f(x)=f(a)","lim f(x)≠f(a)","f(a)=0","lim f(x)=0"] },
+      { q: "Nếu lim f(x) và lim g(x) đều tồn tại, thì lim[f(x)+g(x)]=?", a: "lim f(x)+lim g(x)", opts: ["lim f(x)+lim g(x)","0","Không xác định","Vô cực"] },
+      { q: "Giới hạn của hằng số c là?", a: "c", opts: ["0","1","c","Không xác định"] },
+      { q: "Nếu lim f(x)=∞ thì nói f(x)?", a: "Không có giới hạn hữu hạn", opts: ["Có giới hạn","Không có giới hạn hữu hạn","Bằng 0","Bằng c"] }
+    ],
+    6: [
+      { q: "Định nghĩa log_a b là gì?", a: "x sao cho a^x=b", opts: ["a*b","x sao cho a^x=b","a/b","b^a"] },
+      { q: "log_a(a) =", a: "1", opts: ["0","1","a","Không xác định"] },
+      { q: "log_a(1) =", a: "0", opts: ["1","0","a","Không xác định"] },
+      { q: "log_a(bc) =", a: "log_a b + log_a c", opts: ["log_a b + log_a c","log_a b - log_a c","log_a b * log_a c","log_a b / log_a c"] },
+      { q: "a^{log_a b} =", a: "b", opts: ["b","a","1","Không xác định"] }
+    ],
+    7: [
+      { q: "Hai đường thẳng vuông góc khi?", a: "Tích vô hướng bằng 0", opts: ["Tích vô hướng bằng 0","Song song","Cùng phương","Trùng nhau"] },
+      { q: "Một đường thẳng vuông góc với mặt phẳng khi?", a: "Vuông góc với hai đường cắt nhau trong mặt phẳng đó", opts: ["Vuông góc với một đường","Cắt mặt phẳng","Trùng","Không xác định"] },
+      { q: "Phép chiếu vuông góc bảo toàn?", a: "Độ dài theo phương chiếu", opts: ["Độ dài","Diện tích","Độ dài theo phương chiếu","Thể tích"] },
+      { q: "Khoảng cách giữa hai mặt phẳng song song bằng?", a: "Khoảng cách từ điểm bất kỳ đến mặt phẳng kia", opts: ["0","Khoảng cách từ điểm bất kỳ đến mặt phẳng kia","Không xác định","∞"] },
+      { q: "Thể tích khối hộp chữ nhật =", a: "a·b·c", opts: ["a·b·c","2(a+b+c)","abc/2","a²b²c²"] }
+    ],
+    8: [
+      { q: "P(A∪B) = ?", a: "P(A)+P(B)-P(A∩B)", opts: ["P(A)+P(B)-P(A∩B)", "P(A)+P(B)", "P(A)-P(B)", "P(A)*P(B)"] },
+      { q: "Xác suất luôn nằm trong khoảng?", a: "[0,1]", opts: ["[0,1]","(-∞,+∞)","[1,2]","(0,∞)"] },
+      { q: "Nếu A và B độc lập thì P(A∩B) =", a: "P(A)P(B)", opts: ["P(A)+P(B)","P(A)P(B)","P(A)-P(B)","P(A)/P(B)"] },
+      { q: "Tổng các xác suất của mọi biến cố cơ bản =", a: "1", opts: ["0","1",">1","Không xác định"] },
+      { q: "Biến cố chắc chắn có xác suất =", a: "1", opts: ["0","1","Không xác định","0,5"] }
+    ],
+    9: [
+      { q: "Đạo hàm của f(x)=x² là?", a: "2x", opts: ["x","2x","x²","1/x"] },
+      { q: "f'(x)=lim?", a: "(f(x+h)-f(x))/h", opts: ["f(x+h)+f(x)","(f(x+h)-f(x))/h","f(x)/h","h/f(x)"] },
+      { q: "Đạo hàm của sinx là?", a: "cosx", opts: ["cosx","-cosx","sinx","-sinx"] },
+      { q: "Đạo hàm của cosx là?", a: "-sinx", opts: ["sinx","-sinx","cosx","-cosx"] },
+      { q: "Đạo hàm của e^x là?", a: "e^x", opts: ["e^x","xe^(x-1)","lnx","1/x"] }
+    ]
+  };
+  
+  // ======================== CODE HIỂN THỊ ========================
+  const chaptersDiv = document.getElementById("chapters");
+  const lessonsDiv = document.getElementById("lessons");
+  const lessonDetail = document.getElementById("lessonDetail");
+  const contentDiv = document.getElementById("content");
+  
+  data.forEach((ch, i) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.textContent = ch.title;
+    div.onclick = () => openChapter(i + 1);
+    chaptersDiv.appendChild(div);
+  });
+  
+  function openChapter(id) {
+    chaptersDiv.style.display = "none";
+    lessonsDiv.classList.add("active");
+    lessonsDiv.innerHTML = `<h2>${data[id-1].title}</h2>`;
+    data[id - 1].lessons.forEach((b, i) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.textContent = b;
+      card.onclick = () => openLesson(id, i + 1);
+      lessonsDiv.appendChild(card);
+    });
+    const back = document.createElement("div");
+    back.className = "back";
+    back.textContent = "← Quay lại danh sách chương";
+    back.onclick = () => {
+      lessonsDiv.classList.remove("active");
+      chaptersDiv.style.display = "block";
+    };
+    lessonsDiv.appendChild(back);
+  }
+  
+  function openLesson(ch, b) {
+    lessonsDiv.classList.remove("active");
+    lessonDetail.classList.add("active");
+    const title = data[ch - 1].lessons[b - 1];
+    lessonDetail.innerHTML = `<h2>${title}</h2>
+    <button class="btn" onclick="showTheory(${ch},${b})">📖 Lý thuyết</button>
+    <button class="btn" onclick="showQuiz(${ch})">📝 Bài tập trắc nghiệm</button>
+    <div class="back" onclick="backToLessons(${ch})">← Quay lại danh sách bài</div>`;
+  }
+  
+  function showTheory(ch, b) {
+    lessonDetail.classList.remove("active");
+    contentDiv.classList.add("active");
+    contentDiv.innerHTML = `<h2>${data[ch-1].lessons[b-1]} - Lý thuyết</h2>
+    <p>Dán link video hoặc sách giáo khoa tại đây:</p>
+    <input type="text" id="link" placeholder="Dán link YouTube hoặc trang web...">
+    <button class="btn" onclick="loadVideo()">Hiển thị</button>
+    <div id="videoArea"></div>
+    <div class="back" onclick="backToLesson(${ch},${b})">← Quay lại</div>`;
+  }
+  
+  function loadVideo() {
+    const link = document.getElementById("link").value;
+    const videoArea = document.getElementById("videoArea");
+    if (link.includes("youtube")) {
+      const id = link.split("v=")[1];
+      videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;
+    } else {
+      videoArea.innerHTML = `<a href="${link}" target="_blank" style="color:var(--accent2)">Mở tài liệu tại đây</a>`;
+    }
+  }
+  
+  function showQuiz(ch) {
+    lessonDetail.classList.remove("active");
+    contentDiv.classList.add("active");
+  
+    let qList = quiz[ch] || [];
+    // nếu chương có >5 câu → chọn ngẫu nhiên 5 câu
+    if (qList.length > 5) {
+      qList = qList.sort(() => Math.random() - 0.5).slice(0, 5);
+    }
+  
+    let html = `<h2>Bài tập trắc nghiệm</h2>`;
+    qList.forEach((q, i) => {
+      html += `<div class="question" id="q${ch}_${i}">
+        <strong>${i + 1}. ${q.q}</strong><br>`;
+      q.opts.forEach(opt => {
+        html += `<div class="option" onclick="checkAnswer(${ch}, ${i}, '${opt}', this)">${opt}</div>`;
+      });
+      html += `<div class='result'></div></div>`;
+    });
+    html += `<div class="back" onclick="backToLesson(${ch},1)">← Quay lại</div>`;
+    contentDiv.innerHTML = html;
+  }
+  
+  function checkAnswer(ch, i, opt, el) {
+    const parent = el.parentElement;
+    const q = quiz[ch].find(item => item.q === parent.querySelector("strong").textContent.slice(3));
+    const resultDiv = parent.querySelector(".result");
+    if (!resultDiv.textContent) {
+      if (opt === q.a) {
+        resultDiv.innerHTML = "<p style='color:lightgreen;'>✅ Đúng rồi!</p>";
+      } else {
+        resultDiv.innerHTML = `<p style='color:#ff6b6b;'>❌ Sai, đáp án đúng là: <b>${q.a}</b></p>`;
+      }
+    }
+  }
+  
+  function backToLessons(ch) {
+    lessonDetail.classList.remove("active");
+    openChapter(ch);
+  }
+  function backToLesson(ch, b) {
+    contentDiv.classList.remove("active");
+    openLesson(ch, b);
+  }
+  </script>
+  
+<!-- Nút quay lại trang chính -->
+<div style="margin-top:30px;">
+  <button class="btn" onclick="window.location.href='index.html'">
+    ← Quay lại trang chính
+  </button>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
